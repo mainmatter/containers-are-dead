@@ -1,6 +1,12 @@
+use std::env;
 use std::iter::Peekable;
 use std::str::Chars;
 use std::str::FromStr;
+
+pub fn main() {
+    let args: Vec<String> = env::args().collect();
+    dbg!(args);
+}
 
 struct Evaluator<'a> {
     parser: Peekable<Parser<'a>>,

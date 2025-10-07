@@ -39,25 +39,9 @@ the [`solutions` branch](https://github.com/mainmatter/containers-are-dead/tree/
 Copyright © 2024- Mainmatter GmbH (https://mainmatter.com), released under the
 [Creative Commons Attribution-NonCommercial 4.0 International license](https://creativecommons.org/licenses/by-nc/4.0/).
 
-- Chapter 01: Basics (1.5 hours)
-  goals:
-  - understand the wasm format, and concepts
-  - understand how to build wasm apps in rust
-  - understand how to run wasm apps locally
-  - understand the limitations (missing crate support, missing host support)
-    exercises:
-  - 1.1: setup
-  - 1.2: basic wasm32-unknown-unknown module (TODO what should this module do?)
-    goal: understand the wasm32-unknown-unknown target, understand its output, and its limitations.
-    exercise: implement a simple tokenizer that reads arithmetic expressions from a string and parses them.
-  - 1.3: basic wasm32-wasip2 app that reads command-line arguments (what should the app do with the arguments?)
-    goal: understand the wasm32-wasip2/wasip2/wasip3 target, its advantages over wasm32-unknown-unknown, the basics of the component model, and its current limitations.
-    - how to compile the component
-    - execute with wasmtime
-      exercise: use the tokenizer from before and adapt it to use proper Rust types. Extend the tokenizer to evaluate expressions. read expressions from stdin and print to stdout
 - Chapter 02: Building Real Server-Side Applications (3 hours)
   goals:
-  - 2.1: cloud hosting providers
+  - 2.0: cloud hosting providers
     - serverless functions
     - spin framework?
     - install `spin` and install `spin-test` plugin
@@ -65,7 +49,7 @@ Copyright © 2024- Mainmatter GmbH (https://mainmatter.com), released under the
       spin plugin install -u https://github.com/spinframework/spin-test/releases/download/canary/spin-test.json
       ```
     exercise: compile and run the simple hello world http handler
-  - 2.2: HTTP requests with the spin framework
+  - 2.1: HTTP requests with the spin framework
     goal: demonstrate easy to use, serverless nature, understand permissions, and the manifest
     exercise: fix an http endpoint to return random numbers
   - 2.2: HTTP handlers proper
@@ -74,7 +58,10 @@ Copyright © 2024- Mainmatter GmbH (https://mainmatter.com), released under the
   - 2.3: Key Value Store
     goal: demonstrate how simple values can be stored across calls and the usefulness of that. demonstrate limitations. but emphasize cross-platform support.
     exercise: expand expression evaluator to support assigning values to variables. Store the variables in the spin-sdk KV store.
-  - 2.2: Routing
+  - 2.4: Key Value Store
+    goal: demonstrate how simple values can be stored across calls and the usefulness of that. demonstrate limitations. but emphasize cross-platform support.
+    exercise: expand expression evaluator to support assigning values to variables. Store the variables in the spin-sdk KV store.
+  - 2.5: Routing
     goal: understand how in-component routing works, understand how composition works, understand how inter-component routing works
     - point to Rust + Go demo for inter-language composition
       exercise: expand expression evaluator to support assigning values to variables. Store the variables in the spin-sdk KV store.

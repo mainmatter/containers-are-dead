@@ -112,4 +112,3 @@ As always, for a full solution check out the [`solutions` branch of the GitHub r
 [`f64::from_str`]: https://doc.rust-lang.org/std/primitive.f64.html#method.from_str
 
 [^1]: Reference types also exist but are not supported across all WebAssembly runtimes just yet.
-[^2]: The parser should
