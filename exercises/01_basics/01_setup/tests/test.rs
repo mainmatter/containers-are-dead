@@ -2,7 +2,7 @@ extern crate setup;
 
 #[test]
 fn verify_it_works() {
-    extern "C" {
+    unsafe extern "C" {
         fn it_works() -> bool;
     }
 

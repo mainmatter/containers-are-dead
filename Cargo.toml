@@ -7,6 +7,7 @@ members = [
   "exercises/01_basics/04_components_contd",
   "exercises/02_http/00_spin",
   "exercises/02_http/00_spin/tests",
+  "exercises/02_http/01_requests",
   "verifier",
 ]
 resolver = "2"
