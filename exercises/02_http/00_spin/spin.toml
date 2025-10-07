@@ -1,0 +1,19 @@
+spin_manifest_version = 2
+
+[application]
+name = "spin"
+version = "1.0.0"
+
+[[trigger.http]]
+route = "/..."
+component = "spin"
+
+[component.spin]
+source = "../../../target/wasm32-wasip1/debug/spin.wasm"
+
+[component.spin.build]
+command = "cargo build --target wasm32-wasip1"
+watch = ["src/**/*.rs", "Cargo.toml"]
+
+[component.spin.tool.spin-test]
+source = "../../../target/wasm32-wasip1/debug/spin_tests.wasm"

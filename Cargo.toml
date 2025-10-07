@@ -1,9 +1,18 @@
 [workspace]
-members = ["exercises/*/*", "verifier"]
-exclude = ["exercises/02_http/05_routing_go", "exercises/02_http/01_simple/tests", "exercises/03_advanced"]
+members = [
+  "exercises/01_basics/00_welcome",
+  "exercises/01_basics/01_setup",
+  "exercises/01_basics/02_functions",
+  "exercises/01_basics/03_components",
+  "exercises/01_basics/04_components_contd",
+  "exercises/02_http/00_spin",
+  "exercises/02_http/00_spin/tests",
+  "verifier",
+]
 resolver = "2"
 
 [workspace.dependencies]
 clap = { version = "4.5.48", features = ["derive"] }
+spin-test-sdk = { git = "https://github.com/spinframework/spin-test", version = "0.1.0" }
 wasmtime = "37.0.1"
 wasmtime-wasi = "37.0.1"

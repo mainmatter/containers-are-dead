@@ -42,13 +42,6 @@ Copyright © 2024- Mainmatter GmbH (https://mainmatter.com), released under the
 - Chapter 02: Building Real Server-Side Applications (3 hours)
   goals:
   - 2.0: cloud hosting providers
-    - serverless functions
-    - spin framework?
-    - install `spin` and install `spin-test` plugin
-      ```
-      spin plugin install -u https://github.com/spinframework/spin-test/releases/download/canary/spin-test.json
-      ```
-    exercise: compile and run the simple hello world http handler
   - 2.1: HTTP requests with the spin framework
     goal: demonstrate easy to use, serverless nature, understand permissions, and the manifest
     exercise: fix an http endpoint to return random numbers
