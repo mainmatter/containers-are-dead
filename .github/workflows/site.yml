@@ -36,11 +36,16 @@ jobs:
             --require-https
             --no-progress
             book/book
-      # Upload the book as an artifact
-      - uses: actions/upload-artifact@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v4
         with:
-          name: book
-          path: book/book
+          # Upload entire repository
+          path: "book/book"
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
   formatter:
     runs-on: ubuntu-latest

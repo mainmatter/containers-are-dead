@@ -38,17 +38,3 @@ the [`solutions` branch](https://github.com/mainmatter/containers-are-dead/tree/
 
 Copyright © 2024- Mainmatter GmbH (https://mainmatter.com), released under the
 [Creative Commons Attribution-NonCommercial 4.0 International license](https://creativecommons.org/licenses/by-nc/4.0/).
-
-- Chapter 02: Building Real Server-Side Applications (3 hours)
-  goals:
-  - 2.5: Routing
-    goal: understand how in-component routing works, understand how composition works, understand how inter-component routing works
-    - point to Rust + Go demo for inter-language composition
-      exercise: expand expression evaluator to support assigning values to variables. Store the variables in the spin-sdk KV store.
-- Chapter 03: Advanced (1.5 hours)
-  goals:
-  - 3.1: Observability
-    goal: with hosted code, host performance becomes a critical part, show off the otel integration. Demonstrate current limitations (i.e. no support for guest o11y).
-  - 3.1: Performance Optimization
-    - size optimizations (--release, no_std, wasm-opt)
-    - runtime optimizations (pre-evaluation of modules)
