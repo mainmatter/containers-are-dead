@@ -68,7 +68,7 @@ pub async fn handler(_req: Request) -> anyhow::Result<impl IntoResponse> {
 }
 ```
 
-You will notice the `async` keyword and use of `await` in the handler function; `spin` yields control back to the runtime while waiting for the network response. This quality of life feature helps your components to be more resource efficient. Since Spin SDK 6 every handler is `async` and every host API returns a future.
+You will notice the `async` keyword and use of `await` in the handler function; the component yields control back to the host while waiting for the network response, so one instance does not block a thread. This is how WASI 0.3 models I/O in general. Since Spin SDK 6 every handler is `async` and every host API returns a future.
 
 Also note that `Request` and `Response` are the types of the ecosystem's [`http`] crate. Under the hood `spin_sdk::http::send` is backed by the standard `wasi:http` interface, so the same code works on any host that implements WASI HTTP. Other host APIs - key value stores for example - still require a `spin`-specific interface. This exemplifies the relatively early, in-progress nature of WebAssembly: In the absence of standards different hosting providers built out custom APIs and capabilities. The WASI standards address this fragmentation but adoption across providers is still in progress.
 

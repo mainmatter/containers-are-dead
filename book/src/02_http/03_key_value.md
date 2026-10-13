@@ -62,7 +62,7 @@ This is a Spin interface, not a WASI one, and `wasmtime serve` refuses the compo
 
 ## JSON
 
-The `spin` store also provides two convenience methods for storing any [`serde`] serializable data into the store as JSON: [`Store::get_json()`] and [`Store::set_json()`].
+The SDK also provides two convenience methods for storing any [`serde`] serializable data into the store as JSON: [`Store::get_json()`] and [`Store::set_json()`].
 
 ```rust
 use serde::{Serialize, Deserialize};

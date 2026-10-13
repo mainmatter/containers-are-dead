@@ -6,12 +6,12 @@ WebAssembly has gained in popularity in recent years because unlike traditional 
 
 A number of big companies now provide support for Wasm, among them Cloudflare, Fastly, and Akamai. Each of these hosting providers unfortunately exposes slightly different host APIs and capabilities. The WASI standards we have seen earlier are the ecosystem's answer to this fragmentation, and adoption is still in progress.
 
-For this workshop we will be using the [`spin`] framework because it has a nice set of APIs. The things you will learn during this workshop should translate easily to other providers as well.
+For this workshop we need _some_ host to run our components in, and we use the [`spin`] framework. It is an example, not a recommendation. We picked it on four criteria: it is open source and free, it runs on your laptop without an account or a network, it executes standard `wasi:http` components, and it bundles a key value store and SQLite so we can teach storage without setting up infrastructure. Other hosts meet some of these - plain `wasmtime serve` and wasmCloud run the same components, the commercial platforms (Fastly, Cloudflare) come with their own ABIs - and you will run one of the exercises on `wasmtime` directly to see what is standard and what is not. Mainmatter has no affiliation with Spin's maintainers.
 
 ## Spin Framework
 
-`spin` is an open-source framework for building and deploying _serverless_ WebAssembly applications. It was created by Fermyon, has been a CNCF sandbox project since January 2025 and is maintained by Akamai since it acquired Fermyon in December 2025.
-For every incoming request, the runtime will spin up a fresh instance of your Wasm component that is immediately terminated after processing the request. The runtime additionally exposes APIs for common tasks like making HTTP requests, routing, key-value storage, database access, and more. We will go through some of these APIs in the following sections.
+`spin` is an open-source framework for building and running _serverless_ WebAssembly applications. It was created by Fermyon, has been a CNCF sandbox project since January 2025 and is maintained by Akamai since it acquired Fermyon in December 2025. Like every host in this space it is a thin layer over [`wasmtime`], the Bytecode Alliance's runtime.
+For every incoming request, the runtime will spin up a fresh instance of your Wasm component that is immediately terminated after processing the request. The runtime additionally exposes APIs for common tasks like making HTTP requests, routing, key-value storage, database access, and more. We will go through some of these APIs in the following sections, and point out for each whether it is a WASI standard or a Spin interface.
 
 ### Prerequisites
 
@@ -67,4 +67,5 @@ The tests for this chapter live in the `tests` directory of each exercise. They 
 Make the component respond with the text `Hello World!`. Have a look at the [`spin_sdk::http`] docs for `Response::builder()`.
 
 [`spin`]: https://spinframework.dev
+[`wasmtime`]: https://wasmtime.dev
 [`spin_sdk::http`]: https://docs.rs/spin-sdk/latest/spin_sdk/http/index.html

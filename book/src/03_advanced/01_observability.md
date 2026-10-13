@@ -2,7 +2,7 @@
 
 In WebAssembly serverless applications, more responsibility is shifted to the host runtime. This makes host-level observability even more essential for understanding application performance and debugging issues. After all, the runtime might be the bottleneck!
 
-`spin` provides built-in support for OpenTelemetry (OTEL), an industry-standard observability framework that collects metrics, traces, and logs from distributed systems. This integration requires [Docker](https://docs.docker.com/desktop/) or Podman to run the OTEL collector and visualization tools locally.
+Observability is a host concern, so it comes from whichever runtime you embed, not from your component. We look at it through `spin` because its `otel` plugin packages the whole stack in one command; `wasmtime` itself exposes the same signals through its tracing and profiling hooks. `spin` provides built-in support for OpenTelemetry (OTEL), an industry-standard observability framework that collects metrics, traces, and logs from distributed systems. This integration requires [Docker](https://docs.docker.com/desktop/) or Podman to run the OTEL collector and visualization tools locally.
 
 To enable observability, first install the OTEL plugin which provides integration with OpenTelemetry tooling:
 

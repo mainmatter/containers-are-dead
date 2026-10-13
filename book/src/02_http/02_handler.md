@@ -1,7 +1,7 @@
 # HTTP Handlers
 
-`spin` allows you to annotate a function with the `#[http_service]` attribute. This marks it as the
-HTTP request entry point. This handler receives a `Request` object containing the HTTP request data and must return a `Result` with a type that implements `IntoResponse` (such as a `Response` or string). The function must be `async`: the runtime yields control while waiting for I/O operations such as outbound HTTP requests or database calls to complete.
+The Spin SDK lets you annotate a function with the `#[http_service]` attribute. This marks it as the
+HTTP request entry point, the macro generates the `wasi:http/handler` export for you. Other SDKs do the same job with a different attribute, [`wstd`] uses `#[wstd::http_server]`. This handler receives a `Request` object containing the HTTP request data and must return a `Result` with a type that implements `IntoResponse` (such as a `Response` or string). The function must be `async`: the runtime yields control while waiting for I/O operations such as outbound HTTP requests or database calls to complete.
 
 ```rust
 #[http_service]
@@ -38,7 +38,7 @@ let input = str::from_utf8(&body)?;
 
 When Rust code panics inside a WebAssembly component, it triggers a WebAssembly _trap_[^1]. Unlike traditional server applications where this would crash the entire system, WebAssembly's sandbox means all we get is a rather ugly stack trace in the terminal and a `500` response.
 
-Instead of relying on panics, HTTP endpoints should use "proper" error handling using `Result`s. `spin` HTTP endpoints conveniently already allow us to return `anyhow::Result<impl IntoResponse>`. This means we can propagate server-internal errors (errors that we want to show up as 5xx status code responses) simply using the `?` operator.
+Instead of relying on panics, HTTP endpoints should use "proper" error handling using `Result`s. The handler signature already allows us to return `anyhow::Result<impl IntoResponse>`. This means we can propagate server-internal errors (errors that we want to show up as 5xx status code responses) simply using the `?` operator.
 
 _Client errors_ i.e. errors we want to return in response to invalid user input still require us to build and return `Response`s ourselves:
 
@@ -92,3 +92,4 @@ Keep this experiment in mind. The next two sections add storage, and the imports
 
 [`http`]: https://docs.rs/http/latest/http/
 [`wasm-tools`]: https://github.com/bytecodealliance/wasm-tools
+[`wstd`]: https://github.com/bytecodealliance/wstd
