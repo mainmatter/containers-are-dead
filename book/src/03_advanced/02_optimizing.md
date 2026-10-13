@@ -44,9 +44,9 @@ watch = ["src/**/*.rs", "Cargo.toml"]
 
 A plain release build comes in at _620 KB_, the profile above brings it down to _370 KB_. `opt-level = "z"` and `lto` are responsible for most of that.
 
-Binaryen - a WebAssembly optimizer and compiler toolchain - provides a widely used tool called `wasm-opt` that can squeeze core modules further (`wasm-opt input.wasm -Oz -o output.wasm`). It does not understand components yet though: the `.wasm` files we build in this chapter make it fail with a parse error, so it only helps for core modules like the ones from the first chapter. You can download it from the Binaryen GitHub releases [here](https://github.com/WebAssembly/binaryen/releases); it is also in most package repositories under the `binaryen` name and in the `nix` flake of this repo.
+Binaryen's `wasm-opt` (`wasm-opt in.wasm -Oz -o out.wasm`) squeezes core modules further, but it doesn't understand components yet - it fails to parse the `.wasm` files from this chapter - so it only helps with the core modules from chapter 1. Download it from the Binaryen [releases](https://github.com/WebAssembly/binaryen/releases), most package repositories have it as `binaryen` and the `nix` flake of this repo provides it.
 
-Beyond the compiler flags, size is mostly a matter of dependencies: `serde_json`, `axum` and the SQL client each cost tens of kilobytes. Check [`cargo bloat`](https://github.com/RazrFalcon/cargo-bloat) or `twiggy` to see what you are paying for.
+Beyond compiler flags, size is mostly dependencies: `serde_json`, `axum` and the SQL client each cost tens of kilobytes. [`cargo bloat`](https://github.com/RazrFalcon/cargo-bloat) or `twiggy` show what you pay for.
 
 ## Optimizing for Performance
 

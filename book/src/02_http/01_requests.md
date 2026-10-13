@@ -34,13 +34,13 @@ watch = ["src/**/*.rs", "Cargo.toml"]
 
 ## Variables
 
-The second addition is a _variable_. `[variables]` declares `random_api` with a default value at the application level, `[component.requests.variables]` passes it to the component. Inside the component you read it with:
+The second addition is a _variable_: `[variables]` declares `random_api` with a default, `[component.requests.variables]` hands it to the component. Read it with:
 
 ```rust
 let api = spin_sdk::variables::get("random_api").await?;
 ```
 
-Variables can be overridden when starting the application, e.g. by setting the environment variable `SPIN_VARIABLE_RANDOM_API`. The tests for this exercise use exactly that to point the component at a local stand-in for the real API, so they work without internet access. That is also why `127.0.0.1:3100` is in the list of allowed hosts.
+Variables can be overridden at startup, e.g. with the environment variable `SPIN_VARIABLE_RANDOM_API`. The tests use that to point the component at a local stand-in for the real API, hence `127.0.0.1:3100` in the allowed hosts.
 
 ## Making Requests
 
@@ -68,12 +68,12 @@ pub async fn handler(_req: Request) -> anyhow::Result<impl IntoResponse> {
 }
 ```
 
-You will notice the `async` keyword and use of `await` in the handler function; the component yields control back to the host while waiting for the network response, so one instance does not block a thread. This is how WASI 0.3 models I/O in general. Since Spin SDK 6 every handler is `async` and every host API returns a future.
+You will notice the `async` keyword and use of `await` in the handler function; the component yields back to the host while waiting for the response instead of blocking. Since Spin SDK 6 every handler is `async` and every host API returns a future.
 
-Also note that `Request` and `Response` are the types of the ecosystem's [`http`] crate. Under the hood `spin_sdk::http::send` is backed by the standard `wasi:http` interface, so the same code works on any host that implements WASI HTTP. Other host APIs - key value stores for example - still require a `spin`-specific interface. This exemplifies the relatively early, in-progress nature of WebAssembly: In the absence of standards different hosting providers built out custom APIs and capabilities. The WASI standards address this fragmentation but adoption across providers is still in progress.
+`Request` and `Response` are the [`http`] crate's types and `spin_sdk::http::send` is backed by the standard `wasi:http` interface, so this code runs on any host implementing WASI HTTP. Key value stores and databases are a different story, as you will see.
 
 ## Exercise
 
-Implement the endpoint described in `src/lib.rs`: it takes `min` and `max` query parameters, asks `randomnumberapi.com` for a random number in that range and returns it as plain text. The `serde-querystring` crate is already added as a dependency to parse `req.uri().query()`.
+Implement the endpoint described in `src/lib.rs`: take `min` and `max` query parameters, ask `randomnumberapi.com` for a random number in that range and return it as plain text. `serde-querystring` is already a dependency, use it to parse `req.uri().query()`.
 
 [`http`]: https://docs.rs/http/latest/http/

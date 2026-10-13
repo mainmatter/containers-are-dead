@@ -1,7 +1,7 @@
 # HTTP Handlers
 
-The Spin SDK lets you annotate a function with the `#[http_service]` attribute. This marks it as the
-HTTP request entry point, the macro generates the `wasi:http/handler` export for you. Other SDKs do the same job with a different attribute, [`wstd`] uses `#[wstd::http_server]`. This handler receives a `Request` object containing the HTTP request data and must return a `Result` with a type that implements `IntoResponse` (such as a `Response` or string). The function must be `async`: the runtime yields control while waiting for I/O operations such as outbound HTTP requests or database calls to complete.
+`spin` lets you annotate a function with the `#[http_service]` attribute. This marks it as the
+HTTP request entry point, the macro generates the `wasi:http/handler` export (other SDKs do the same, [`wstd`] uses `#[wstd::http_server]`). This handler receives a `Request` object containing the HTTP request data and must return a `Result` with a type that implements `IntoResponse` (such as a `Response` or string). The function must be `async`: the runtime yields control while waiting for I/O operations such as outbound HTTP requests or database calls to complete.
 
 ```rust
 #[http_service]
@@ -53,9 +53,9 @@ Ok(Response::builder()
 
 ## Exercise
 
-Bring the parser and evaluator from the previous chapter into the HTTP handler. The endpoint should only accept `POST` requests (respond with `405 Method Not Allowed` otherwise), evaluate the request body and return the result as plain text. Invalid expressions must produce a `400 Bad Request`, not a panic - replace the `unwrap`s and `panic!`s in your evaluator with `anyhow::Result`s.
+Bring the parser and evaluator from the previous chapter into the HTTP handler. Accept `POST` only (`405` otherwise), evaluate the body and return the result as plain text. Invalid input is a `400`, not a panic - replace the `unwrap`s and `panic!`s in your evaluator with `anyhow::Result`s.
 
-Start the application with `spin up --build` in a second terminal and try it out:
+Start the application with `spin up --build` and try it out:
 
 ```bash
 curl --request POST --data '10 / 2' http://localhost:3000/
@@ -63,30 +63,30 @@ curl --request POST --data '10 / 2' http://localhost:3000/
 
 ## One Component, Many Hosts
 
-Before moving on, let's cash in on the promise from the end of chapter 1. Inspect the component you just built with [`wasm-tools`] (`cargo install wasm-tools`):
+Time to cash in on the promise from chapter 1. Inspect the component with [`wasm-tools`] (`cargo install wasm-tools`):
 
 ```bash
 wasm-tools component wit target/wasm32-wasip2/debug/handler.wasm
 ```
 
-Among the imports you will find only `wasi:cli`, `wasi:clocks`, `wasi:io`, `wasi:random` and `wasi:http/types@0.3.0`, and a single export:
+The imports are all `wasi:*`, and there is a single export:
 
 ```wit
 export wasi:http/handler@0.3.0;
 ```
 
-Nothing in there is specific to Spin. The component implements the standard `wasi:http` world, so any host that speaks it can run it. The reference host is `wasmtime` itself, install the CLI with `curl https://wasmtime.dev/install.sh -sSf | bash` and try:
+Nothing in there is Spin specific, so any host that implements `wasi:http` can run it. Try the reference host, `wasmtime` (`curl https://wasmtime.dev/install.sh -sSf | bash`):
 
 ```bash
 wasmtime serve -Scli target/wasm32-wasip2/debug/handler.wasm
 curl --request POST --data '2 + 3 * 4' http://localhost:8080/
 ```
 
-Same binary, same answers, no Spin involved (`-Scli` lets the component use `println!`). wasmCloud and the `jco` runtime for Node.js load the same file as well. The hosts that can't - Fastly Compute, Cloudflare Workers, Wasmer - each have their own ABI and SDK; that is the fragmentation WASI exists to end.
+Same binary, same answers (`-Scli` lets the component use `println!`). wasmCloud and `jco` (Node.js) load it as well; Fastly, Cloudflare and Wasmer don't, they have their own ABIs. That is the fragmentation WASI is meant to end.
 
-> Note: `wasmtime serve` is a development server. Its own documentation says not to deploy it: no TLS, no rate limiting, no request size limits.
+> Note: `wasmtime serve` is a development server: no TLS, no rate limiting, no request size limits.
 
-Keep this experiment in mind. The next two sections add storage, and the imports will tell you exactly where the standard ends.
+The next sections add storage. Watch the imports.
 
 [^1]: A trap is similar to a segfault. It cannot be caught and will cause your Wasm component to be terminated.
 

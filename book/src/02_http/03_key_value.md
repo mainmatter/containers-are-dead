@@ -27,7 +27,7 @@ command = "cargo build -p key_value --target wasm32-wasip2"
 watch = ["src/**/*.rs", "Cargo.toml"]
 ```
 
-This configuration gives the `key-value` component access to the `"default"` store. Spin provides it out of the box, backed by a SQLite file in the `.spin` directory; additional stores can be declared in the runtime configuration. We can then open this store in our Rust code by calling the [`Store::open_default()`] method:
+This configuration gives the `key-value` component access to the `"default"` store, a SQLite file in the `.spin` directory. More stores can be declared in the runtime configuration. We can then open this store in our Rust code by calling the [`Store::open_default()`] method:
 
 ```rust
 use spin_sdk::key_value::Store;
@@ -52,13 +52,13 @@ All store operations are `async`.
 
 ## Where the Standard Ends
 
-Run `wasm-tools component wit` on the finished component and compare with the previous exercise. One new import appeared:
+Run `wasm-tools component wit` on the finished component. One import is new:
 
 ```wit
 import spin:key-value/key-value@3.0.0;
 ```
 
-This is a Spin interface, not a WASI one, and `wasmtime serve` refuses the component with "a matching implementation was not found in the linker". A standard is in the making: [`wasi:keyvalue`] is a phase 2 proposal with the same `get`/`set`/`delete` shape. Spin, wasmtime and wasmCloud all implement a draft of it, but they pin different draft versions (`0.2.0-draft2` vs `0.2.0-draft`) and WIT versions must match exactly to link, so a component using it does not yet move between hosts unchanged. Until that settles, storage is where you pick a vendor - and the HTTP handler around it stays portable.
+It is a Spin interface, not WASI, and `wasmtime serve` rejects the component: "a matching implementation was not found in the linker". A standard is in the making - [`wasi:keyvalue`], phase 2, same `get`/`set`/`delete` shape - but Spin, wasmtime and wasmCloud pin different draft versions and WIT versions must match exactly, so it doesn't link across hosts yet. Storage is where you pick a vendor. The handler around it stays portable.
 
 ## JSON
 
@@ -94,7 +94,7 @@ store.set_json(user_name, &val).await?;
 
 ## Exercise
 
-Extend the calculator with variables, see `src/lib.rs` for the details. The store persists across requests _and_ across restarts of `spin up` - delete the `.spin` directory in the exercise if you want to start from scratch.
+Extend the calculator with variables, see `src/lib.rs`. The store persists across requests _and_ restarts - delete the `.spin` directory to start fresh.
 
 [Key Value Store]: https://spinframework.dev/v4/kv-store-api-guide
 [`HashMap`]: https://doc.rust-lang.org/std/collections/struct.HashMap.html

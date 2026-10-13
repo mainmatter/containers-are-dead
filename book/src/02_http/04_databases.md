@@ -14,7 +14,7 @@ source = "../../../target/wasm32-wasip2/debug/databases.wasm"
 +sqlite_databases = ["default"]
 ```
 
-Spin creates the `default` database on first use but does not create any tables. Pass the migration when starting the application:
+Spin creates the `default` database on first use but no tables. Pass the migration at startup:
 
 ```bash
 spin up --build --sqlite @migration.sql
@@ -22,7 +22,7 @@ spin up --build --sqlite @migration.sql
 
 The tests do the same.
 
-Like the key value store this is a Spin interface, `spin:sqlite/sqlite@3.1.0` in the component's imports. Here not even a draft standard exists: [`wasi:sql`] is a phase 1 proposal with no activity since early 2024, and there is no `wasi:sqlite`. The portable alternative is to compile SQLite _into_ the component (`rusqlite` with the `bundled` feature builds for `wasm32-wasip2`), which works for in-memory data but needs a vendor interface or `wasi:filesystem` again for persistence.
+Like the key value store this is a Spin interface, `spin:sqlite/sqlite@3.1.0` in the imports. Here not even a draft standard exists: [`wasi:sql`] is phase 1 and dormant since early 2024. The portable alternative is to compile SQLite _into_ the component (`rusqlite` with `bundled` builds for `wasm32-wasip2`), in memory or on top of `wasi:filesystem`.
 
 ## Connecting to the Database
 
@@ -56,7 +56,7 @@ connection
     .await?;
 ```
 
-Careful: `execute` returns as soon as the statement has been _started_. The [`QueryResult`] it returns is a stream of rows plus a future for the outcome of the statement; `result()` awaits that future. Skip it and your `INSERT` may not have happened yet when you send the response.
+Careful: `execute` returns once the statement is _started_. The [`QueryResult`] is a stream of rows plus a future for the outcome, `result()` awaits the latter. Skip it and your `INSERT` may not have happened when you respond.
 
 ## Retrieving Data
 
@@ -82,11 +82,11 @@ while let Some(row) = rows.next().await {
 rows.result().await?;
 ```
 
-Same rule as above: `result()` finishes the statement and reports an error if reading the rows failed. [`collect()`] does both in one go if the result set fits into memory.
+`result()` also reports errors while reading rows. [`collect()`] does both in one go.
 
 ## Exercise
 
-Move the variables from the key value store into SQLite and add _sessions_ so users no longer share variables. See `src/lib.rs` and `migration.sql` for the details.
+Move the variables into SQLite and add _sessions_ so users stop sharing them. See `src/lib.rs` and `migration.sql`.
 
 [`SQLite`]: https://www.sqlite.org
 [`wasi:sql`]: https://github.com/WebAssembly/wasi-sql

@@ -4,14 +4,14 @@ We have seen WebAssembly as "shared libraries" and WebAssembly as standalone CLI
 
 WebAssembly has gained in popularity in recent years because unlike traditional container-based deployments, WebAssembly modules start in microseconds rather than seconds, making them ideal for functions that need to scale rapidly from zero. Additionally, their strong sandboxing and efficient resource utilization makes them a perfect fit for serverless and edge computing applications.
 
-A number of big companies now provide support for Wasm, among them Cloudflare, Fastly, and Akamai. Each of these hosting providers unfortunately exposes slightly different host APIs and capabilities. The WASI standards we have seen earlier are the ecosystem's answer to this fragmentation, and adoption is still in progress.
+A number of big companies now provide support for Wasm, among them Cloudflare, Fastly, and Akamai. Each of these hosting providers unfortunately exposes slightly different host APIs and capabilities. The WASI standards we have seen earlier are the ecosystem's answer to this fragmentation, adoption is still in progress.
 
-For this workshop we need _some_ host to run our components in, and we use the [`spin`] framework. It is an example, not a recommendation. We picked it on four criteria: it is open source and free, it runs on your laptop without an account or a network, it executes standard `wasi:http` components, and it bundles a key value store and SQLite so we can teach storage without setting up infrastructure. Other hosts meet some of these - plain `wasmtime serve` and wasmCloud run the same components, the commercial platforms (Fastly, Cloudflare) come with their own ABIs - and you will run one of the exercises on `wasmtime` directly to see what is standard and what is not. Mainmatter has no affiliation with Spin's maintainers.
+For this workshop we need a host to run our components. We use [`spin`]: it is open source, runs offline on your laptop, executes standard `wasi:http` components and ships a key value store and SQLite, so we can teach storage without infrastructure. It is an example, not a recommendation - `wasmtime serve` and wasmCloud run the same components, and you will try one of them later. Mainmatter is not affiliated with Spin.
 
 ## Spin Framework
 
-`spin` is an open-source framework for building and running _serverless_ WebAssembly applications. It was created by Fermyon, has been a CNCF sandbox project since January 2025 and is maintained by Akamai since it acquired Fermyon in December 2025. Like every host in this space it is a thin layer over [`wasmtime`], the Bytecode Alliance's runtime.
-For every incoming request, the runtime will spin up a fresh instance of your Wasm component that is immediately terminated after processing the request. The runtime additionally exposes APIs for common tasks like making HTTP requests, routing, key-value storage, database access, and more. We will go through some of these APIs in the following sections, and point out for each whether it is a WASI standard or a Spin interface.
+`spin` is an open-source framework for building and running _serverless_ WebAssembly applications on top of [`wasmtime`]. It was created by Fermyon, joined the CNCF sandbox in January 2025 and is maintained by Akamai since it acquired Fermyon in December 2025.
+For every incoming request, the runtime will spin up a fresh instance of your Wasm component that is immediately terminated after processing the request. The runtime additionally exposes APIs for common tasks like making HTTP requests, routing, key-value storage, database access, and more. We will go through some of these APIs in the following sections and note which are WASI standards and which are Spin's own.
 
 ### Prerequisites
 
@@ -51,16 +51,16 @@ The `[application]` section contains basic metadata. The `[[trigger.http]]` sect
 
 ### Running and Testing
 
-`spin up --build` compiles the component and serves it on `http://localhost:3000`. Try it in a second terminal:
+`spin up --build` compiles the component and serves it on `http://localhost:3000`:
 
 ```bash
 spin up --build
 curl -i localhost:3000
 ```
 
-The tests for this chapter live in the `tests` directory of each exercise. They start `spin up --build` themselves (on port 3333, so they don't collide with your own instance), send HTTP requests to it and shut it down again. `wr` runs them with `cargo test -p spin_tests`.
+Each exercise in this chapter has a `tests` package. The tests start `spin up --build` themselves (on port 3333, so your own instance doesn't collide), send requests and shut it down again. `wr` runs `cargo test -p spin_tests`.
 
-> Note: Spin used to ship a `spin test` plugin that ran tests inside a virtualized Spin host. It is unmaintained and does not work with current SDKs, so we test the application from the outside instead.
+> Note: The `spin test` plugin is unmaintained and incompatible with current SDKs, so we test from the outside.
 
 ## Exercise
 

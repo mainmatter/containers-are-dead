@@ -1,6 +1,6 @@
 # Routing
 
-So far we have only ever seen a single catch-all (`/...`) endpoint per component. Spin offers two levels of routing: between components in `spin.toml`, and within a component in code.
+So far we have only ever seen a single catch-all (`/...`) endpoint per component. There are two levels of routing: between components in `spin.toml`, and within a component in code.
 
 ## Routing between multiple Components
 
@@ -28,13 +28,13 @@ source = "target/wasm32-wasip2/release/orders.wasm"
 
 When a request arrives, Spin's HTTP trigger examines the URL path and matches it against the configured routes, most specific first. The request is then forwarded to the corresponding WebAssembly component.
 
-This allows you to compose applications from modular components - recall the component composition from earlier - that can be developed, tested, and deployed independently. The components don't even have to share a language: a Rust component and a Go component can serve neighbouring routes of the same application.
+This allows you to compose applications from modular components - recall the component composition from earlier - that can be developed, tested, and deployed independently. They don't have to share a language either, a Rust and a Go component can serve neighbouring routes.
 
-The exercise for this section does exactly that: `spin.toml` routes `/eval` to the `databases` component from the previous exercise (unchanged, it is built from `../04_databases`) and `/clear/...` to a new `routing` component.
+The exercise does exactly that: `spin.toml` routes `/eval` to the `databases` component from the previous exercise (built from `../04_databases`, unchanged) and `/clear/...` to a new `routing` component.
 
 ## Routing Within A Component
 
-What if one component should serve multiple endpoints? Instead of manually parsing URLs and HTTP methods in your handler function, use a router. Since `spin_sdk::http` uses the ecosystem's [`http`] types, any router that works with them works in Spin. The exercise uses [`axum`]:
+What if one component should serve multiple endpoints? Use a router instead of parsing URLs and methods by hand. `spin_sdk::http` uses the [`http`] crate's types, so any router built on them works. The exercise uses [`axum`]:
 
 ```rust
 use axum::extract::{Path, Query};
@@ -62,13 +62,13 @@ async fn create_user(body: String) -> String {
 }
 ```
 
-The router supports path parameters (`{id}`) that are extracted and passed to handlers via [`axum` extractors] such as `Path` and `Query`. Handlers return anything that implements `axum::response::IntoResponse` - a `String`, a `StatusCode`, a `Result`, ... Error handling moves into the handlers: a `Result<T, (StatusCode, String)>` becomes the error response on `Err`.
+Path parameters (`{id}`) and query strings arrive through [`axum` extractors] like `Path` and `Query`. Handlers return anything implementing `axum::response::IntoResponse` - a `String`, a `StatusCode`, a `Result` whose `Err` becomes the error response.
 
 > Note: Spin SDK versions before 6 shipped their own `Router`. It is gone, use `axum` or any other `http` based router.
 
 ## Exercise
 
-Implement the two `DELETE` endpoints in `src/lib.rs`. Both need the `session` query parameter, requests without one must fail with `400 Bad Request`.
+Implement the two `DELETE` endpoints in `src/lib.rs`. Both need the `session` query parameter, without it they fail with `400`.
 
 [`http`]: https://docs.rs/http/latest/http/
 [`axum`]: https://docs.rs/axum/latest/axum/

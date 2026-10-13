@@ -44,7 +44,7 @@ WebAssembly System Interface (WASI) defines a set of standard interfaces for com
 - `wasi:cli` Command-Line Interface (CLI) environment. Provides Stdio, Command-line arguments, and the concept of a `main` function.
 - `wasi:http` Sending and receiving HTTP requests and responses.
 
-WASI 0.3 (released June 2026) replaces `wasi:io` with native `async` functions, `stream<T>` and `future<T>` types in the component model itself. Rust support (`wasm32-wasip3`) is still tier 3, so this workshop targets WASI 0.2.
+WASI 0.3 (June 2026) replaces `wasi:io` with native `async` functions, `stream<T>` and `future<T>` in the component model itself. Rust's `wasm32-wasip3` target is still tier 3, so this workshop targets WASI 0.2.
 
 Today Rust applications can easily access most of these interfaces by simply compiling to the [`wasm32-wasip2`] target. Rust standard library types such as [`std::time::SystemTime`], [`std::fs::File`], or [`std::net::TcpStream`] will automatically make use of the WASI interfaces. Things WASI has no interface for - spawning processes with [`std::process::Command`] for example - return an `Unsupported` error.
 
@@ -54,7 +54,7 @@ Today Rust applications can easily access most of these interfaces by simply com
 
 The Rust ecosystem has strong support for building WebAssembly Components. The `wasm32-wasip2` target produces a component directly, and the [`wit-bindgen`] crate generates the Rust bindings for a WIT file at compile time. No extra tools are required.
 
-> Note: Older material (and this workshop until recently) used the [`cargo-component`] tool instead. Its maintainers are deprecating it in favour of the built-in target, so we won't use it.
+> Note: Older material (and this workshop until recently) used the [`cargo-component`] tool. Its maintainers are deprecating it in favour of the built-in target.
 
 ### Project Structure
 
@@ -111,7 +111,7 @@ This file is quite a bit simpler though, we simply declare we will be _importing
 
 #### `./wit/deps/random/random.wit`
 
-The WIT of every imported package has to be available locally. `wit/deps/random/random.wit` is a verbatim copy of the `wasi:random` interface. For a larger project you would fetch dependencies with [`wkg`](https://github.com/bytecodealliance/wasm-pkg-tools) from a registry instead of copying them by hand.
+The WIT of every imported package has to be available locally. `wit/deps/random/random.wit` is a verbatim copy of the `wasi:random` interface. Larger projects fetch dependencies from a registry with [`wkg`](https://github.com/bytecodealliance/wasm-pkg-tools) instead.
 
 ### Rust Bindings
 
@@ -127,7 +127,7 @@ wit_bindgen::generate!({
 });
 ```
 
-The macro reads the `wit` directory and expands to Rust code at compile time (run `cargo expand` or read the [`wit-bindgen`] docs if you want to see it). The gist:
+The macro reads the `wit` directory and expands to Rust code at compile time (`cargo expand` shows it). The gist:
 
 - bindings to all interfaces we imported are available as submodules. In our case that is `wasi::random::random` to access the random number interface.
 - `Guest` is a `trait` that we have to implement in order to be compliant with the interface we promised above.
