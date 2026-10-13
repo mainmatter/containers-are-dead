@@ -9,11 +9,8 @@ route = "/..."
 component = "handler"
 
 [component.handler]
-source = "../../../target/wasm32-wasip1/debug/handler.wasm"
+source = "../../../target/wasm32-wasip2/debug/handler.wasm"
 
 [component.handler.build]
-command = "cargo build -p handler --target wasm32-wasip1"
+command = "cargo build -p handler --target wasm32-wasip2"
 watch = ["src/**/*.rs", "Cargo.toml"]
-
-[component.handler.tool.spin-test]
-source = "../../../target/wasm32-wasip1/debug/handler_tests.wasm"

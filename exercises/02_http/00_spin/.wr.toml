@@ -1,11 +1,3 @@
 [[verification]]
 command = "cargo"
-args = ["build", "-p", "spin_tests", "--target", "wasm32-wasip1"]
-
-[[verification]]
-command = "spin"
-args = ["build"]
-
-[[verification]]
-command = "spin"
-args = ["test"]
+args = ["test", "-p", "spin_tests"]

@@ -8,5 +8,4 @@ crate-type = ["cdylib"]
 
 [dependencies]
 anyhow.workspace = true
-fallible-iterator.workspace = true
 spin-sdk.workspace = true

@@ -2,13 +2,13 @@
 
 In WebAssembly serverless applications, more responsibility is shifted to the host runtime. This makes host-level observability even more essential for understanding application performance and debugging issues. After all, the runtime might be the bottleneck!
 
-`spin` provides built-in support for OpenTelemetry (OTEL), an industry-standard observability framework that collects metrics, traces, and logs from distributed systems. This integration [requires Docker](https://docs.docker.com/desktop/) to run the OTEL collector and visualization tools locally.
+`spin` provides built-in support for OpenTelemetry (OTEL), an industry-standard observability framework that collects metrics, traces, and logs from distributed systems. This integration requires [Docker](https://docs.docker.com/desktop/) or Podman to run the OTEL collector and visualization tools locally.
 
 To enable observability, first install the OTEL plugin which provides integration with OpenTelemetry tooling:
 
 ```sh
 spin plugins update
-spin plugins install otel
+spin plugin install otel
 ```
 
 Then set up the OTEL stack. This downloads the necessary Docker containers, including collectors, storage backends, and visualization tools like [Jaeger](https://www.jaegertracing.io) for distributed tracing and [Grafana](https://grafana.com) for metrics dashboards:

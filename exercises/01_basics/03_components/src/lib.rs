@@ -1,5 +1,9 @@
-#[allow(warnings)]
-mod bindings;
+// Generates Rust bindings for the WIT world at compile time. Read the book to find out how.
+wit_bindgen::generate!({
+    path: "wit",
+    world: "example",
+    generate_all,
+});
 
-// This component should implement the interface laid out in the WIT file. Read the book to find out how.
+// This component should implement the interface laid out in the WIT file.
 // If you get stuck, ask a neighbor or grab a trainer!

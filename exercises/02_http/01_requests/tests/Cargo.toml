@@ -2,9 +2,7 @@
 name = "requests_tests"
 version = "0.1.0"
 edition = "2024"
+publish = false
 
-[lib]
-crate-type = ["cdylib"]
-
-[dependencies]
-spin-test-sdk.workspace = true
+[dev-dependencies]
+workshop-harness.workspace = true

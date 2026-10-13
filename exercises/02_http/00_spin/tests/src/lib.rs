@@ -1,18 +1,20 @@
-use spin_test_sdk::{bindings::wasi::http, spin_test};
+//! ⚠️ **DO NOT MODIFY THE TESTS** ⚠️
+//! `cargo test -p spin_tests` builds and starts the Spin application in the parent directory,
+//! then sends requests to it.
+#![cfg(test)]
 
-#[spin_test]
-fn send_get_request_without_key() {
-    // Perform the request
-    let request = http::types::OutgoingRequest::new(http::types::Headers::new());
-    request.set_path_with_query(Some("/")).unwrap();
-    let response = spin_test_sdk::perform_request(request);
+use std::path::Path;
+use workshop_harness::{request, start};
 
-    // Assert response status is 200
-    assert_eq!(response.status(), 200);
+fn app_dir() -> &'static Path {
+    Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap()
+}
 
-    // Assert the body is "Hello World!"
-    assert_eq!(
-        String::from_utf8(response.body().unwrap()).unwrap(),
-        "Hello World!"
-    )
+#[test]
+fn hello_world() {
+    start(app_dir(), &[], &[]);
+
+    let response = request("GET", "/", "");
+    assert_eq!(response.status, 200);
+    assert_eq!(response.body, "Hello World!");
 }

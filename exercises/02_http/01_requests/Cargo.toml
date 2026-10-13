@@ -8,6 +8,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 anyhow.workspace = true
-serde = { workspace = true, features = ["derive"] }
+serde.workspace = true
 serde-querystring.workspace = true
+serde_json.workspace = true
 spin-sdk.workspace = true

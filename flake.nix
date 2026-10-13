@@ -33,9 +33,6 @@
             binaryen
             wizer
 
-            # wasm components
-            cargo-component
-
             fermyon-spin
 
             # devtools

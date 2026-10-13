@@ -9,12 +9,9 @@ route = "/..."
 component = "databases"
 
 [component.databases]
-source = "../../../target/wasm32-wasip1/debug/databases.wasm"
+source = "../../../target/wasm32-wasip2/debug/databases.wasm"
 sqlite_databases = ["default"]
 
 [component.databases.build]
-command = "cargo build -p databases --target wasm32-wasip1"
+command = "cargo build -p databases --target wasm32-wasip2"
 watch = ["src/**/*.rs", "Cargo.toml"]
-
-[component.databases.tool.spin-test]
-source = "../../../target/wasm32-wasip1/debug/databases_tests.wasm"

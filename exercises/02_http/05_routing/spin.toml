@@ -13,20 +13,17 @@ route = "/clear/..."
 component = "routing"
 
 [component.databases]
-source = "../../../target/wasm32-wasip1/debug/databases.wasm"
+source = "../../../target/wasm32-wasip2/debug/databases.wasm"
 sqlite_databases = ["default"]
 
 [component.databases.build]
-command = "cargo build -p databases --target wasm32-wasip1"
-watch = ["../04_databases/src/**/*.rs", "Cargo.toml"]
+command = "cargo build -p databases --target wasm32-wasip2"
+watch = ["../04_databases/src/**/*.rs", "../04_databases/Cargo.toml"]
 
 [component.routing]
-source = "../../../target/wasm32-wasip1/debug/routing.wasm"
+source = "../../../target/wasm32-wasip2/debug/routing.wasm"
 sqlite_databases = ["default"]
 
 [component.routing.build]
-command = "cargo build -p routing --target wasm32-wasip1"
+command = "cargo build -p routing --target wasm32-wasip2"
 watch = ["src/**/*.rs", "Cargo.toml"]
-
-[component.routing.tool.spin-test]
-source = "../../../target/wasm32-wasip1/debug/routing_tests.wasm"

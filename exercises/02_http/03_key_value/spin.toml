@@ -9,12 +9,9 @@ route = "/..."
 component = "key-value"
 
 [component.key-value]
-source = "../../../target/wasm32-wasip1/debug/key_value.wasm"
+source = "../../../target/wasm32-wasip2/debug/key_value.wasm"
 key_value_stores = ["default"]
 
 [component.key-value.build]
-command = "cargo build -p key_value --target wasm32-wasip1"
+command = "cargo build -p key_value --target wasm32-wasip2"
 watch = ["src/**/*.rs", "Cargo.toml"]
-
-[component.key-value.tool.spin-test]
-source = "../../../target/wasm32-wasip1/debug/key_value_tests.wasm"

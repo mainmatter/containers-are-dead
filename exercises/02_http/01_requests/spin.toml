@@ -4,17 +4,20 @@ spin_manifest_version = 2
 name = "requests"
 version = "1.0.0"
 
+[variables]
+random_api = { default = "http://www.randomnumberapi.com" }
+
 [[trigger.http]]
 route = "/..."
 component = "requests"
 
 [component.requests]
-source = "../../../target/wasm32-wasip1/debug/requests.wasm"
-allowed_outbound_hosts = ["http://www.randomnumberapi.com"]
+source = "../../../target/wasm32-wasip2/debug/requests.wasm"
+allowed_outbound_hosts = ["http://www.randomnumberapi.com", "http://127.0.0.1:3100"]
+
+[component.requests.variables]
+random_api = "{{ random_api }}"
 
 [component.requests.build]
-command = "cargo build -p requests --target wasm32-wasip1"
+command = "cargo build -p requests --target wasm32-wasip2"
 watch = ["src/**/*.rs", "Cargo.toml"]
-
-[component.requests.tool.spin-test]
-source = "../../../target/wasm32-wasip1/debug/requests_tests.wasm"

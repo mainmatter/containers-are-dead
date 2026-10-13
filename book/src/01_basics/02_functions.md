@@ -7,20 +7,20 @@ WebAssembly functions can only pass and return basic numeric types: `i32`, `i64`
 To export a Rust function so it can be called by the WebAssembly host, use `extern "C"`:
 
 ```rust
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn add(a: i32, b: i32) -> i32 {
     a + b
 }
 ```
 
-The `extern "C"` calling convention ensures the function uses C-style ABI, which allows other languages to call it correctly when importing the Wasm module. The `#[no_mangle]` attribute prevents Rust from changing the function name during compilation, making it accessible under its original name. This is important since all imports and exports in WebAssembly are referenced by name.
+The `extern "C"` calling convention ensures the function uses C-style ABI, which allows other languages to call it correctly when importing the Wasm module. The `#[unsafe(no_mangle)]` attribute prevents Rust from changing the function name during compilation (since edition 2024 it must be wrapped in `unsafe(...)` because a duplicate symbol name is undefined behaviour), making it accessible under its original name. This is important since all imports and exports in WebAssembly are referenced by name.
 
 ## Passing Complex Data
 
 Since WebAssembly can only pass numbers directly, complex data like strings must be passed as pointers and lengths:
 
 ```rust
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn process_string(ptr: *const u8, len: usize) -> i32 {
     let slice = unsafe { std::slice::from_raw_parts(ptr, len) };
     let string = std::str::from_utf8(slice).unwrap();
@@ -29,7 +29,26 @@ pub extern "C" fn process_string(ptr: *const u8, len: usize) -> i32 {
 }
 ```
 
-Callers write string data to WebAssembly linear memory and passes the memory address (`ptr`) and byte length (`len`) as function parameters.
+Callers write string data to WebAssembly linear memory and pass the memory address (`ptr`) and byte length (`len`) as function parameters.
+
+## Returning Complex Data
+
+The same applies to return values. The test suite for this exercise allocates a `Vec<Token>` with a fixed capacity, passes its pointer and capacity to your function, and expects the number of tokens written in return:
+
+```rust
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn parse_expression(
+    in_ptr: *const u8,
+    in_len: usize,
+    out_ptr: *mut Token,
+    out_len: usize,
+) -> usize {
+    // tokenize the input, write at most `out_len` tokens to `out_ptr`,
+    // return how many you wrote
+}
+```
+
+Take a look at `tests/test.rs` to see the calling side.
 
 ## Exercise
 
@@ -111,4 +130,4 @@ As always, for a full solution check out the [`solutions` branch of the GitHub r
 [`.next_if()`]: https://doc.rust-lang.org/std/iter/struct.Peekable.html#method.next_if
 [`f64::from_str`]: https://doc.rust-lang.org/std/primitive.f64.html#method.from_str
 
-[^1]: Reference types also exist but are not supported across all WebAssembly runtimes just yet.
+[^1]: Reference types (`funcref`, `externref`) exist as well, but they are opaque handles - the guest cannot read the data behind them.

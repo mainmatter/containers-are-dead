@@ -13,8 +13,28 @@ By compiling to the `wasm32-wasip2` target, Rust automatically implements the [`
 You can run the exercise directly using `cargo run --target wasm32-wasip2`.
 
 > Note: Usually you _cannot_ simply `cargo run` executables compiled to `wasm32-wasip2` the same way you
-> cannot simply run executables compiled for `x86` on an `aarch64` machine. For your convenience this workshop provides a runner built on `wasmtime` that allows you to run these as if the were native executables.
+> cannot simply run executables compiled for `x86` on an `aarch64` machine. For your convenience this workshop provides a runner built on `wasmtime` that allows you to run these as if they were native executables.
 
-**TODO exercise hints**
+## Exercise
+
+Implement `main` so that it reads the expression from the command line, evaluates it and prints the result. A recursive descent evaluator that mirrors the grammar is the simplest approach:
+
+```plaintext
+expression := term   (("+" | "-") term)*
+term       := factor (("*" | "/") factor)*
+factor     := number | "-" factor | "(" expression ")"
+```
+
+<details><summary><b>Hint 01</b></summary>
+
+The workshop runner passes _only_ the expression as argument, so `std::env::args().next()` is the expression. A native binary would see the program path first.
+
+</details>
+
+<details><summary><b>Hint 02</b></summary>
+
+Each grammar rule becomes one method on an evaluator struct that holds a `Peekable` token iterator. `eval_factor` recurses into `eval_expression` for parentheses.
+
+</details>
 
 [`wasi:cli/run`]: https://github.com/WebAssembly/wasi-cli/blob/72eb3e163ce0a506a1132a0d3965af0d25aeff65/wit/run.wit

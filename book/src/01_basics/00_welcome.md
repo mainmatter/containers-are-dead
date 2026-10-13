@@ -28,6 +28,7 @@ also find solutions to all exercises in the
 To follow this course, you must install:
 
 - [Rust](https://www.rust-lang.org/tools/install)
+- [Spin](https://spinframework.dev) (installed in chapter 2)
 
 If you have `nix` installed on your system, you can use the nix flake provided in the [courses Git repository](https://github.com/mainmatter/containers-are-dead) to install the required tools and skip ahead to the next section. Otherwise continue with the installation instructions below.
 
@@ -38,6 +39,8 @@ If Rust is already installed on your machine, make sure to update it to the late
 # you can update to the latest stable toolchain with:
 rustup update stable
 ```
+
+`rustup` will add the `wasm32-unknown-unknown`, `wasm32-wasip1` and `wasm32-wasip2` targets automatically from `rust-toolchain.toml` the first time `cargo` runs in the repository.
 
 These commands should successfully run on your machine:
 
@@ -74,7 +77,7 @@ git checkout -b my-solutions
 
 All exercises are located in the `exercises` folder.
 Each exercise is structured as a Rust package.
-The package contains the exercise itself, instructions on what to do (in `src/lib.rs`), and a test suite to
+The package contains the exercise itself, instructions on what to do (in `src/lib.rs` or `src/main.rs`), and a test suite to
 automatically verify your solution.
 
 ### `wr`, the workshop runner
@@ -96,7 +99,3 @@ Don't move on to the next section until you've solved the exercise for the curre
 > so you can easily track your progress and "restart" from a known point if needed.
 
 Enjoy the course!
-
-## Author
-
-TODO

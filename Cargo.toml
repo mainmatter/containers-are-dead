@@ -10,22 +10,28 @@ members = [
   "exercises/02_http/01_requests",
   "exercises/02_http/01_requests/tests",
   "exercises/02_http/02_handler",
+  "exercises/02_http/02_handler/tests",
   "exercises/02_http/03_key_value",
+  "exercises/02_http/03_key_value/tests",
   "exercises/02_http/04_databases",
+  "exercises/02_http/04_databases/tests",
   "exercises/02_http/05_routing",
+  "exercises/02_http/05_routing/tests",
+  "exercises/02_http/harness",
   "verifier",
 ]
 resolver = "2"
 
 [workspace.dependencies]
-anyhow = "1.0.100"
-clap = { version = "4.5.48", features = ["derive"] }
-fallible-iterator = "0.3.0"
+anyhow = "1.0.104"
+axum = { version = "0.8.9", default-features = false, features = ["query"] }
+clap = { version = "4.6.7", features = ["derive"] }
 serde = { version = "1.0", features = ["derive"] }
 serde-querystring = "0.3.0"
 serde_json = "1.0"
-spin-sdk = "5.0.0"
-spin-test-sdk = { git = "https://github.com/spinframework/spin-test", version = "0.1.0" }
-wasmtime = "37.0.1"
-wasmtime-wasi = "37.0.1"
-wit-bindgen-rt = "0.44.0"
+spin-sdk = "7.0.0"
+tower-service = "0.3.3"
+wasmtime = "49.0.2"
+wasmtime-wasi = "49.0.2"
+wit-bindgen = "0.62.0"
+workshop-harness = { path = "exercises/02_http/harness" }

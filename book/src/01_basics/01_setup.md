@@ -38,6 +38,7 @@ version = "0.1.0"
 edition = "2024"
 
 [lib]
+name = "setup"
 crate-type = ["cdylib", "rlib"]
 ```
 
@@ -46,7 +47,7 @@ and instructs the compiler to emit a special Rust-flavored static library that i
 
 ## WebAssembly Binary Format
 
-WebAssembly is a simple, portable abstract machine and an executable format. It is a low-level enough to allow languages like C/C++ and Rust to run with near-native performance while providing the strong isolation and sandboxing that is required to run untrusted third-party code on the Web.
+WebAssembly is a simple, portable abstract machine and an executable format. It is low-level enough to allow languages like C/C++ and Rust to run with near-native performance while providing the strong isolation and sandboxing that is required to run untrusted third-party code on the Web.
 
 It has gained popularity outside the browser in recent years due to its ability to run on a variety of platforms and its ability to be embedded in a variety of contexts. It is used anywhere between, [operating systems](https://github.com/JonasKruckenberg/k23), [font files](https://github.com/harfbuzz/harfbuzz/blob/main/docs/wasm-shaper.md), [database files](https://db.cs.cmu.edu/papers/2025/zeng-sigmod2025.pdf), and - most relevant for today - serverless cloud hosting providers.
 
@@ -58,7 +59,7 @@ This also explains why we had to instruct Rust to emit a dynamic library: All We
 
 ### Key Concepts
 
-- **Module**: Represents a WebAssembly binary that has been compiled by the browser into executable machine code. A module is stateless and explicitly declares imports and exports just like a Rust module/crate does.
+- **Module**: A WebAssembly binary, decoded and validated by the host. A module is stateless and explicitly declares imports and exports just like a Rust module/crate does.
 - **Memory**: A resizable memory region that contains the linear array of bytes read and written by WebAssembly's low-level memory access instructions. Essentially a `Vec<u8>`.
 - **Table**: A resizable typed array of references (e.g., to functions) that could not otherwise be stored as raw bytes in Memory (for safety and portability reasons).
 - **Global**: A global value, either mutable or immutable. These are used as global variables by code or e.g. to communicate configuration options from the host to instances.
@@ -68,7 +69,7 @@ This also explains why we had to instruct Rust to emit a dynamic library: All We
 
 Head to the exercise for this section and compile it to WebAssembly. This can be done by running `cargo build --target wasm32-unknown-unknown --release`. Note you will need to make some - trivial - changes to the Rust code to make it compile.
 
-You can then find the compiled `.wasm` file in your target folder under `target/wasm32-unknown-unknown/release/setup.wasm`. Open this website in your browser: https://webassembly.github.io/wabt/demo/wasm2wat/ and drag your `.wasm` file into the "editor" section. Take a look at the disassembly! It should look something like this:
+You can then find the compiled `.wasm` file in your target folder under `target/wasm32-unknown-unknown/release/setup.wasm`. Note that all exercises share the `target` folder at the root of the repository, not one per exercise. Open this website in your browser: https://webassembly.github.io/wabt/demo/wasm2wat/ and drag your `.wasm` file into the "editor" section. Take a look at the disassembly! It should look something like this:
 
 ```wasm
 (module $setup.wasm
@@ -90,17 +91,15 @@ Here's what each section of our compiled module does:
 - `(type $t0 (func (result i32)))`: Defines a function signature type that takes no parameters and returns a 32-bit integer
 - `(func $it_works (export "it_works") ...)`: Our exported function that the host can call, returning the constant value `1`
 - `(table $T0 1 1 funcref)`: A table for function references (required by Rust, even if unused)
-- `(memory $memory (export "memory") 16)`: Linear memory of 16 pages (1MB total) that the host can access too (because of `(export "memory")`).
+- `(memory $memory (export "memory") 16)`: Linear memory of 16 pages (1 MiB total) that the host can access too (because of `(export "memory")`).
 - `(global $__stack_pointer ...)`: Mutable global for Rust's stack management
 - `(global $__data_end ...)` and `(global $__heap_base ...)`: Exported globals marking memory layout boundaries for Rust's allocator.
-
-You may have noticed that - unlike traditional assembly languages - WebAssembly is **strongly typed**. Every value has a specific type i32, i64, f32, f64, or reference types), all functions declare their signatures (in the example above `$it_works` has function type `$t0` which resolves to `(func (result i32))` - a function accepting no arguments and returning one `i32`).
 
 You may also have noticed the `$__stack_pointer` global and asked yourself why it exists, I thought the WebAssembly stack was implicit and managed by the host??
 
 ### Key Differences from Traditional Assembly
 
-Unlike traditional assembly languages, WebAssembly is **strongly typed**. Every value has a specific type (i32, i64, f32, f64, or reference types). Every instruction is typed as well, for example there is a `i64.add` and an `i32.add` instruction, attempting pass anything but two `i64` values to an `i64.add` instruction will result in an error. This is enforced by the WebAssembly runtime _ahead of time_, programs that don't pass the validation step will not even begin execution. This prevents many classes of bugs that are common in native assembly, e.g. `x86` is happy to interpret your `f64` as an `i64` and do integer arithmetic with it.
+Unlike traditional assembly languages, WebAssembly is **strongly typed**. Every value has a specific type (i32, i64, f32, f64, or reference types). Every instruction is typed as well, for example there is a `i64.add` and an `i32.add` instruction, attempting to pass anything but two `i64` values to an `i64.add` instruction will result in an error. This is enforced by the WebAssembly runtime _ahead of time_, programs that don't pass the validation step will not even begin execution. This prevents many classes of bugs that are common in native assembly, e.g. `x86` is happy to interpret your `f64` as an `i64` and do integer arithmetic with it.
 
 ### The Stack Pointer Global
 

@@ -4,7 +4,7 @@ The ephemeral, serverless nature of WebAssembly HTTP components allows for excel
 
 Most WebAssembly serverless runtimes offer a variety of choices. The first we will look at is the _[Key Value Store]_.
 
-They Key Value Store maps string keys to bytes. It is similar to a Rust [`Hashmap`] or Browser [`LocalStorage`]. <br/>
+The Key Value Store maps string keys to bytes. It is similar to a Rust [`HashMap`] or Browser [`LocalStorage`]. <br/>
 Before you can access the store - similar to exercise [02/01](./01_requests.md) - we need to request access to the store from the runtime. This is done by adding the following line to our `spin.toml` manifest:
 
 ```diff
@@ -19,25 +19,25 @@ route = "/..."
 component = "key-value"
 
 [component.key-value]
-source = "../../../target/wasm32-wasip1/debug/key_value.wasm"
+source = "../../../target/wasm32-wasip2/debug/key_value.wasm"
 +key_value_stores = ["default"]
-[component.key-value.build]
-command = "cargo build -p key_value --target wasm32-wasip1"
 
-[component.key-value.tool.spin-test]
-source = "../../../target/wasm32-wasip1/debug/key_value_tests.wasm"
+[component.key-value.build]
+command = "cargo build -p key_value --target wasm32-wasip2"
+watch = ["src/**/*.rs", "Cargo.toml"]
 ```
 
-This configuration gives the `key-value` component access to the `"default"` store (currently the only supported ID). We can then open this store in our Rust code by calling the [`Store::open_default()`] method:
+This configuration gives the `key-value` component access to the `"default"` store. Spin provides it out of the box, backed by a SQLite file in the `.spin` directory; additional stores can be declared in the runtime configuration. We can then open this store in our Rust code by calling the [`Store::open_default()`] method:
 
 ```rust
-let store = spin_sdk::key_value::Store::open_default()?;
+use spin_sdk::key_value::Store;
 
-let val = self
-    .store
+let store = Store::open_default().await?;
+
+let val = store
     .get("foo")
-    .expect("failed to load value from store")
-    .expect("not such key in the store");
+    .await?
+    .context("no such key in the store")?;
 
 // do something with the value...
 ```
@@ -45,13 +45,10 @@ let val = self
 and write a value back to the store like so:
 
 ```rust
-let store = spin_sdk::key_value::Store::open_default()?;
-
-self
-    .store
-    .set("foo", "bar".as_bytes())
-    .expect("failed to store value in store");
+store.set("foo", "bar".as_bytes()).await?;
 ```
+
+All store operations are `async`.
 
 ## JSON
 
@@ -59,6 +56,7 @@ The `spin` store also provides two convenience methods for storing any [`serde`]
 
 ```rust
 use serde::{Serialize, Deserialize};
+use spin_sdk::key_value::Store;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct User {
@@ -66,30 +64,30 @@ struct User {
     age: u8
 }
 
-let store = spin_sdk::key_value::Store::open_default()?;
+let store = Store::open_default().await?;
 
 // this presumably came from _somewhere_
 let user_name = "john";
 
 // load the user object from the store, it must be deserializable to a `User` struct
-let mut val = self
-    .store
-    .get_json::<User>(user_name)
-    .expect("failed to load value from store")
-    .expect("not such key in the store");
+let mut val: User = store
+    .get_json(user_name)
+    .await?
+    .context("no such key in the store")?;
 
 // update the age (its the users birthday!)
 val.age += 1;
 
 // write the user object back to the store
-self
-    .store
-    .set_json(user_name, val)
-    .expect("failed to store value in store");
+store.set_json(user_name, &val).await?;
 ```
 
-[Key Value Store]: https://spinframework.dev/v3/rust-components#storing-data-in-the-spin-key-value-store
-[`Hashmap`]: https://doc.rust-lang.org/std/collections/struct.HashMap.html
+## Exercise
+
+Extend the calculator with variables, see `src/lib.rs` for the details. The store persists across requests _and_ across restarts of `spin up` - delete the `.spin` directory in the exercise if you want to start from scratch.
+
+[Key Value Store]: https://spinframework.dev/v4/kv-store-api-guide
+[`HashMap`]: https://doc.rust-lang.org/std/collections/struct.HashMap.html
 [`LocalStorage`]: https://developer.mozilla.org/en-US/docs/Web/API/Storage
 [`Store::open_default()`]: https://docs.rs/spin-sdk/latest/spin_sdk/key_value/struct.Store.html#method.open_default
 [`serde`]: https://docs.rs/serde/latest/serde/index.html

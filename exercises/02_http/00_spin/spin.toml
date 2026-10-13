@@ -9,11 +9,8 @@ route = "/..."
 component = "spin"
 
 [component.spin]
-source = "../../../target/wasm32-wasip1/debug/spin.wasm"
+source = "../../../target/wasm32-wasip2/debug/spin.wasm"
 
 [component.spin.build]
-command = "cargo build --target wasm32-wasip1"
+command = "cargo build -p spin --target wasm32-wasip2"
 watch = ["src/**/*.rs", "Cargo.toml"]
-
-[component.spin.tool.spin-test]
-source = "../../../target/wasm32-wasip1/debug/spin_tests.wasm"

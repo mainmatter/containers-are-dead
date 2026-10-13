@@ -4,25 +4,25 @@ We have seen WebAssembly as "shared libraries" and WebAssembly as standalone CLI
 
 WebAssembly has gained in popularity in recent years because unlike traditional container-based deployments, WebAssembly modules start in microseconds rather than seconds, making them ideal for functions that need to scale rapidly from zero. Additionally, their strong sandboxing and efficient resource utilization makes them a perfect fit for serverless and edge computing applications.
 
-A number of big companies now provide support for Wasm, among them Cloudflare, Fastly, and Azure. Each of these hosting providers unfortunately exposes slightly different host APIs and capabilities. This ecosystem fragmentation was one of the original motivations for CloudABI, which then morphed into the WASI standards we have seen earlier!
+A number of big companies now provide support for Wasm, among them Cloudflare, Fastly, and Akamai. Each of these hosting providers unfortunately exposes slightly different host APIs and capabilities. The WASI standards we have seen earlier are the ecosystem's answer to this fragmentation, and adoption is still in progress.
 
-For this workshop we will be using the `spin` framework built by Fermyon because it has a nice set of APIs. The things you will learn during this workshop should translate easily to other providers as well.
+For this workshop we will be using the [`spin`] framework because it has a nice set of APIs. The things you will learn during this workshop should translate easily to other providers as well.
 
 ## Spin Framework
 
-`spin` is an open-source framework for building and deploying _serverless_ WebAssembly applications.
-For every incoming requests, the runtime will spin up a fresh instance of your Wasm component that is immediately terminated after processing the request. The runtime additionally exposes APIs for common tasks like making HTTP requests, routing, key-value storage, database access, and more. We will go through some these of these APIs in the following sections.
+`spin` is an open-source framework for building and deploying _serverless_ WebAssembly applications. It was created by Fermyon, has been a CNCF sandbox project since January 2025 and is maintained by Akamai since it acquired Fermyon in December 2025.
+For every incoming request, the runtime will spin up a fresh instance of your Wasm component that is immediately terminated after processing the request. The runtime additionally exposes APIs for common tasks like making HTTP requests, routing, key-value storage, database access, and more. We will go through some of these APIs in the following sections.
 
 ### Prerequisites
 
-To get started, install the `spin` CLI and the `spin-test` plugin for local development:
+To get started, install the `spin` CLI (this workshop was tested with Spin 4.2):
 
 ```bash
 curl -fsSL https://spinframework.dev/downloads/install.sh | bash
-spin plugin install -u https://github.com/spinframework/spin-test/releases/download/canary/spin-test.json
+sudo mv ./spin /usr/local/bin/spin
 ```
 
-The spin-test plugin allows you to run HTTP tests against your Spin applications locally, `wr` will be using it to check your exercises.
+> Note: If you use `nix`, `spin` is already provided by the dev shell flake in this repo!
 
 ### Spin Configuration
 
@@ -40,16 +40,31 @@ route = "/..."
 component = "spin"
 
 [component.spin]
-source = "../../../target/wasm32-wasip1/release/spin.wasm"
+source = "../../../target/wasm32-wasip2/debug/spin.wasm"
 
 [component.spin.build]
-command = "cargo build --target wasm32-wasip1 --release"
+command = "cargo build -p spin --target wasm32-wasip2"
 watch = ["src/**/*.rs", "Cargo.toml"]
-
-[component.spin.tool.spin-test]
-source = "tests/target/wasm32-wasip1/release/tests.wasm"
 ```
 
-The `[application]` section contains basic metadata. The `[[trigger.http]]` section defines HTTP routing - here `/...` catches all paths and forwards them to the specified component. The `[component]` section points to the compiled WebAssembly module and includes build instructions. The `command` field tells Spin how to compile your Rust code, while `watch` specifies which files should trigger rebuilds during development. The `spin-test` tool configuration enables local testing of your HTTP endpoints.
+The `[application]` section contains basic metadata. The `[[trigger.http]]` section defines HTTP routing - here `/...` catches all paths and forwards them to the specified component. The `[component]` section points to the compiled WebAssembly component and includes build instructions. The `command` field tells Spin how to compile your Rust code, while `watch` specifies which files should trigger rebuilds during development.
+
+### Running and Testing
+
+`spin up --build` compiles the component and serves it on `http://localhost:3000`. Try it in a second terminal:
+
+```bash
+spin up --build
+curl -i localhost:3000
+```
+
+The tests for this chapter live in the `tests` directory of each exercise. They start `spin up --build` themselves (on port 3333, so they don't collide with your own instance), send HTTP requests to it and shut it down again. `wr` runs them with `cargo test -p spin_tests`.
+
+> Note: Spin used to ship a `spin test` plugin that ran tests inside a virtualized Spin host. It is unmaintained and does not work with current SDKs, so we test the application from the outside instead.
+
+## Exercise
+
+Make the component respond with the text `Hello World!`. Have a look at the [`spin_sdk::http`] docs for `Response::builder()`.
 
 [`spin`]: https://spinframework.dev
+[`spin_sdk::http`]: https://docs.rs/spin-sdk/latest/spin_sdk/http/index.html

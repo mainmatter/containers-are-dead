@@ -14,3 +14,5 @@ If you want to continue playing with our "calculator-as-a-service" here are a fe
 - `JCO` for running components on the web: https://github.com/bytecodealliance/jco
 - [Component Model Specification](https://github.com/WebAssembly/component-model)
 - [WebAssembly Blast Zones](https://github.com/WebAssembly/component-model/blob/main/design/mvp/FutureFeatures.md#blast-zones)
+- [WASI 0.3](https://github.com/WebAssembly/WASI/releases/tag/v0.3.0): native async functions, streams and futures (released June 2026, Rust target `wasm32-wasip3` is tier 3 as of Rust 1.99)
+- [Component Model book](https://component-model.bytecodealliance.org/)

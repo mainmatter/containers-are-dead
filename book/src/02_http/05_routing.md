@@ -1,34 +1,6 @@
 # Routing
 
-goal: understand how in-component routing works, understand how composition works, understand how inter-component routing works
-
-## Routing Within A Component
-
-So far we have only ever seen a single catch-all (`/...`) endpoint per component. But what if you want to have multiple endpoint? Spin's `Router` API allows you to delegate requests to different handler functions. Instead of manually parsing URLs and HTTP methods in your handler function, the router allows you to declaratively map routes to handler functions:
-
-```rust
-use spin_sdk::http::{IntoResponse, Params, Request, Response, Router};
-use spin_sdk::http_component;
-
-#[http_component]
-fn handle_route(req: Request) -> Response {
-    let mut router = Router::new();
-    router.get("/users/:id", get_user);
-    router.post("/users", create_user);
-    router.handle(req)
-}
-
-fn get_user(_req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {
-    let user_id = params.get("id").unwrap();
-    // look up the user, or something...
-}
-
-fn create_user(req: Request, _params: Params) -> anyhow::Result<impl IntoResponse> {
-    // look up the user, or something...
-}
-```
-
-The router supports path parameters (`:id`) that are extracted and passed to handlers via the `Params` argument. Each handler function receives the original request and extracted parameters, returning the same `anyhow::Result<impl IntoResponse>` type as the main component handler.
+So far we have only ever seen a single catch-all (`/...`) endpoint per component. Spin offers two levels of routing: between components in `spin.toml`, and within a component in code.
 
 ## Routing between multiple Components
 
@@ -48,15 +20,56 @@ route = "/api/orders/..."
 component = "order-service"
 
 [component.user-service]
-source = "target/wasm32-wasip1/release/users.wasm"
+source = "target/wasm32-wasip2/release/users.wasm"
 
 [component.order-service]
-source = "target/wasm32-wasip1/release/orders.wasm"
+source = "target/wasm32-wasip2/release/orders.wasm"
 ```
 
-When a request arrives, Spin's HTTP trigger examines the URL path and matches it against the configured routes in order of specificity. The request is then forwarded to the corresponding WebAssembly component.
+When a request arrives, Spin's HTTP trigger examines the URL path and matches it against the configured routes, most specific first. The request is then forwarded to the corresponding WebAssembly component.
 
-This allows to to compose applications from modular components - recall the component composition from earlier - that can be developed, tested, and deployed independently.
+This allows you to compose applications from modular components - recall the component composition from earlier - that can be developed, tested, and deployed independently. The components don't even have to share a language: a Rust component and a Go component can serve neighbouring routes of the same application.
 
-- point to Rust + Go demo for inter-language composition
-  exercise: expand expression evaluator to support assigning values to variables. Store the variables in the spin-sdk KV store.
+The exercise for this section does exactly that: `spin.toml` routes `/eval` to the `databases` component from the previous exercise (unchanged, it is built from `../04_databases`) and `/clear/...` to a new `routing` component.
+
+## Routing Within A Component
+
+What if one component should serve multiple endpoints? Instead of manually parsing URLs and HTTP methods in your handler function, use a router. Since `spin_sdk::http` uses the ecosystem's [`http`] types, any router that works with them works in Spin. The exercise uses [`axum`]:
+
+```rust
+use axum::extract::{Path, Query};
+use axum::routing::{get, post};
+use axum::Router;
+use spin_sdk::http::{IntoResponse, Request};
+use spin_sdk::http_service;
+use tower_service::Service;
+
+#[http_service]
+async fn handle_route(req: Request) -> impl IntoResponse {
+    Router::new()
+        .route("/users/{id}", get(get_user))
+        .route("/users", post(create_user))
+        .call(req)
+        .await
+}
+
+async fn get_user(Path(id): Path<String>) -> String {
+    // look up the user, or something...
+}
+
+async fn create_user(body: String) -> String {
+    // create the user, or something...
+}
+```
+
+The router supports path parameters (`{id}`) that are extracted and passed to handlers via [`axum` extractors] such as `Path` and `Query`. Handlers return anything that implements `axum::response::IntoResponse` - a `String`, a `StatusCode`, a `Result`, ... Error handling moves into the handlers: a `Result<T, (StatusCode, String)>` becomes the error response on `Err`.
+
+> Note: Spin SDK versions before 6 shipped their own `Router`. It is gone, use `axum` or any other `http` based router.
+
+## Exercise
+
+Implement the two `DELETE` endpoints in `src/lib.rs`. Both need the `session` query parameter, requests without one must fail with `400 Bad Request`.
+
+[`http`]: https://docs.rs/http/latest/http/
+[`axum`]: https://docs.rs/axum/latest/axum/
+[`axum` extractors]: https://docs.rs/axum/latest/axum/extract/index.html
