@@ -20,16 +20,16 @@ component = "handler"
 
 ## Reading the Request
 
-`Request` is the [`http`] crate's request type. Method, URI and headers are plain accessors. The body is a stream that has to be collected:
-
 ```rust
 use spin_sdk::http::body::IncomingBodyExt;
 use spin_sdk::http::Method;
 
+// `Request` is the `http` crate's type, method, URI and headers are plain accessors
 if req.method() != Method::POST {
     // ...
 }
 
+// the body is a stream, collect it
 let body = req.into_body().bytes().await?;
 let input = str::from_utf8(&body)?;
 ```
@@ -63,33 +63,22 @@ curl --request POST --data '10 / 2' http://localhost:3000/
 
 ## One Component, Many Hosts
 
-Time to cash in on the promise from chapter 1. Inspect the component with [`wasm-tools`] (`cargo install wasm-tools`):
+Inspect the component with [`wasm-tools`] (`cargo install wasm-tools`):
 
 ```bash
 wasm-tools component wit target/wasm32-wasip2/debug/handler.wasm
 ```
 
-The imports are all `wasi:*`, and there is a single export:
-
-```wit
-export wasi:http/handler@0.3.0;
-```
-
-Nothing in there is Spin specific, so any host that implements `wasi:http` can run it. Try the reference host, `wasmtime` (`curl https://wasmtime.dev/install.sh -sSf | bash`):
+All imports are `wasi:*`, the only export is `wasi:http/handler`. Nothing is Spin specific, so [`wasmtime`] runs it as well:
 
 ```bash
 wasmtime serve -Scli target/wasm32-wasip2/debug/handler.wasm
 curl --request POST --data '2 + 3 * 4' http://localhost:8080/
 ```
 
-Same binary, same answers (`-Scli` lets the component use `println!`). wasmCloud and `jco` (Node.js) load it as well; Fastly, Cloudflare and Wasmer don't, they have their own ABIs. That is the fragmentation WASI is meant to end.
-
-> Note: `wasmtime serve` is a development server: no TLS, no rate limiting, no request size limits.
-
-The next sections add storage. Watch the imports.
-
 [^1]: A trap is similar to a segfault. It cannot be caught and will cause your Wasm component to be terminated.
 
 [`http`]: https://docs.rs/http/latest/http/
 [`wasm-tools`]: https://github.com/bytecodealliance/wasm-tools
+[`wasmtime`]: https://wasmtime.dev
 [`wstd`]: https://github.com/bytecodealliance/wstd

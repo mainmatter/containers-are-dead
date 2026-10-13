@@ -6,7 +6,7 @@ WebAssembly has gained in popularity in recent years because unlike traditional 
 
 A number of big companies now provide support for Wasm, among them Cloudflare, Fastly, and Akamai. Each of these hosting providers unfortunately exposes slightly different host APIs and capabilities. The WASI standards we have seen earlier are the ecosystem's answer to this fragmentation, adoption is still in progress.
 
-For this workshop we need a host to run our components. We use [`spin`]: it is open source, runs offline on your laptop, executes standard `wasi:http` components and ships a key value store and SQLite, so we can teach storage without infrastructure. It is an example, not a recommendation - `wasmtime serve` and wasmCloud run the same components, and you will try one of them later. Mainmatter is not affiliated with Spin.
+For this workshop we need a host to run our components. We use [`spin`]: it is open source, runs offline on your laptop, executes standard `wasi:http` components and ships a key value store and SQLite, so we can see more interesting storage examples without much infrastructure. Note that `spin` is just one example, other offerings exist. Mainmatter is not affiliated with Spin.
 
 ## Spin Framework
 
@@ -15,11 +15,11 @@ For every incoming request, the runtime will spin up a fresh instance of your Wa
 
 ### Prerequisites
 
-To get started, install the `spin` CLI (this workshop was tested with Spin 4.2):
+To get started, install the `spin` CLI:
 
 ```bash
 curl -fsSL https://spinframework.dev/downloads/install.sh | bash
-sudo mv ./spin /usr/local/bin/spin
+# then move the `spin` binary somewhere on your PATH
 ```
 
 > Note: If you use `nix`, `spin` is already provided by the dev shell flake in this repo!
@@ -59,8 +59,6 @@ curl -i localhost:3000
 ```
 
 Each exercise in this chapter has a `tests` package. The tests start `spin up --build` themselves (on port 3333, so your own instance doesn't collide), send requests and shut it down again. `wr` runs `cargo test -p spin_tests`.
-
-> Note: The `spin test` plugin is unmaintained and incompatible with current SDKs, so we test from the outside.
 
 ## Exercise
 

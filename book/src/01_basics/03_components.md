@@ -46,7 +46,7 @@ WebAssembly System Interface (WASI) defines a set of standard interfaces for com
 
 WASI 0.3 (June 2026) replaces `wasi:io` with native `async` functions, `stream<T>` and `future<T>` in the component model itself. Rust's `wasm32-wasip3` target is still tier 3, so this workshop targets WASI 0.2.
 
-Today Rust applications can easily access most of these interfaces by simply compiling to the [`wasm32-wasip2`] target. Rust standard library types such as [`std::time::SystemTime`], [`std::fs::File`], or [`std::net::TcpStream`] will automatically make use of the WASI interfaces. Things WASI has no interface for - spawning processes with [`std::process::Command`] for example - return an `Unsupported` error.
+Today Rust applications can easily access most of these interfaces by simply compiling to the [`wasm32-wasip2`] target. Rust standard library types such as [`std::time::SystemTime`], [`std::fs::File`], or [`std::net::TcpStream`] will automatically make use of the WASI interfaces. Things WASI has no interface for, spawning processes with [`std::process::Command`] for example, return an `Unsupported` error.
 
 ## Wasm Component in Rust
 
@@ -115,7 +115,7 @@ The WIT of every imported package has to be available locally. `wit/deps/random/
 
 ### Rust Bindings
 
-`wit-bindgen` generates **type-safe** bindings to our imports. Even better it generates a Rust `trait` that **requires** our component to adhere to the interface we promised above. Let's have a look!
+`wit-bindgen` generates **type-safe** bindings to our imports, and a Rust `trait` that **requires** our component to adhere to the interface we promised above. Let's have a look!
 
 The exercise already contains the macro invocation at the top of `src/lib.rs`:
 

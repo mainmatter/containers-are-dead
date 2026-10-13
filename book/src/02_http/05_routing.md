@@ -28,7 +28,7 @@ source = "target/wasm32-wasip2/release/orders.wasm"
 
 When a request arrives, Spin's HTTP trigger examines the URL path and matches it against the configured routes, most specific first. The request is then forwarded to the corresponding WebAssembly component.
 
-This allows you to compose applications from modular components - recall the component composition from earlier - that can be developed, tested, and deployed independently. They don't have to share a language either, a Rust and a Go component can serve neighbouring routes.
+This allows you to compose applications from modular components (recall the component composition from earlier) that can be developed, tested, and deployed independently. They don't have to be the same language either, a Rust and a Go component can serve routes together.
 
 The exercise does exactly that: `spin.toml` routes `/eval` to the `databases` component from the previous exercise (built from `../04_databases`, unchanged) and `/clear/...` to a new `routing` component.
 
@@ -62,9 +62,7 @@ async fn create_user(body: String) -> String {
 }
 ```
 
-Path parameters (`{id}`) and query strings arrive through [`axum` extractors] like `Path` and `Query`. Handlers return anything implementing `axum::response::IntoResponse` - a `String`, a `StatusCode`, a `Result` whose `Err` becomes the error response.
-
-> Note: Spin SDK versions before 6 shipped their own `Router`. It is gone, use `axum` or any other `http` based router.
+Path parameters (`{id}`) and query strings arrive through [`axum` extractors] like `Path` and `Query`. Handlers can return anything implementing `axum::response::IntoResponse`: a `String`, a `StatusCode`, or a `Result` whose `Err` becomes the error response.
 
 ## Exercise
 

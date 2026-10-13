@@ -14,13 +14,11 @@ source = "../../../target/wasm32-wasip2/debug/databases.wasm"
 +sqlite_databases = ["default"]
 ```
 
-Spin creates the `default` database on first use but no tables. Pass the migration at startup:
+Spin creates the `default` database on first use but no tables. Pass the migration at startup (the tests do the same):
 
 ```bash
 spin up --build --sqlite @migration.sql
 ```
-
-The tests do the same.
 
 Like the key value store this is a Spin interface, `spin:sqlite/sqlite@3.1.0` in the imports. Here not even a draft standard exists: [`wasi:sql`] is phase 1 and dormant since early 2024. The portable alternative is to compile SQLite _into_ the component (`rusqlite` with `bundled` builds for `wasm32-wasip2`), in memory or on top of `wasi:filesystem`.
 
@@ -56,11 +54,11 @@ connection
     .await?;
 ```
 
-Careful: `execute` returns once the statement is _started_. The [`QueryResult`] is a stream of rows plus a future for the outcome, `result()` awaits the latter. Skip it and your `INSERT` may not have happened when you respond.
+Careful: `execute` returns once the statement is _started_. The [`QueryResult`] is a stream of rows plus a future for the outcome, `result()` awaits the latter. If you forget, the `INSERT` call may still be running when your handler responds.
 
 ## Retrieving Data
 
-The [`execute`] method returns a [`QueryResult`], a stream of rows. [`next()`] yields one [`RowResult`] at a time; [`get()`] converts a column - by index - from [`SQLite`]'s storage types to Rust types. Column names are available via [`columns()`].
+The [`execute`] method returns a [`QueryResult`], a stream of rows. [`next()`] yields one [`RowResult`] at a time; [`get()`] converts a column (by index) from [`SQLite`]'s storage types to Rust types. Column names are available via [`columns()`].
 
 ```rust
 use spin_sdk::sqlite::{Connection, Value};
