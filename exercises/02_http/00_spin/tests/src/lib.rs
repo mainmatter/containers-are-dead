@@ -1,6 +1,3 @@
-//! ⚠️ **DO NOT MODIFY THE TESTS** ⚠️
-//! `cargo test -p spin_tests` builds and starts the Spin application in the parent directory,
-//! then sends requests to it.
 #![cfg(test)]
 
 use std::path::Path;

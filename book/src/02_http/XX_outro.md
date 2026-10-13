@@ -8,6 +8,4 @@ Everything we built runs on your laptop with `spin up`. To put it on the interne
 
 `spin registry push ghcr.io/you/calculator:v1` packages the application like a container image, `spin up --from ghcr.io/you/calculator:v1` runs it anywhere Spin is installed.
 
-Deployment targets come and go, the component doesn't change. `wasi:http` is a standard, `wasi:keyvalue` a draft, SQL has none - keep the storage code in a module of its own and the rest moves between hosts as is.
-
 [`wasmtime`]: https://wasmtime.dev

@@ -1,6 +1,3 @@
-//! ⚠️ **DO NOT MODIFY THE TESTS** ⚠️
-//! The tests stand in for `randomnumberapi.com` with a local server and point the component at
-//! it through the `random_api` variable, so they work offline.
 #![cfg(test)]
 
 use std::path::Path;

@@ -44,17 +44,15 @@ WebAssembly System Interface (WASI) defines a set of standard interfaces for com
 - `wasi:cli` Command-Line Interface (CLI) environment. Provides Stdio, Command-line arguments, and the concept of a `main` function.
 - `wasi:http` Sending and receiving HTTP requests and responses.
 
-WASI 0.3 (June 2026) replaces `wasi:io` with native `async` functions, `stream<T>` and `future<T>` in the component model itself. Rust's `wasm32-wasip3` target is still tier 3, so this workshop targets WASI 0.2.
+WASI 0.3 (standardized June 2026) replaces `wasi:io` with native `async` functions, `stream<T>` and `future<T>` in the component model itself. Rust's `wasm32-wasip3` target is still tier 3, so this workshop targets WASI 0.2.
 
-Today Rust applications can easily access most of these interfaces by simply compiling to the [`wasm32-wasip2`] target. Rust standard library types such as [`std::time::SystemTime`], [`std::fs::File`], or [`std::net::TcpStream`] will automatically make use of the WASI interfaces. Things WASI has no interface for, spawning processes with [`std::process::Command`] for example, return an `Unsupported` error.
+Rust applications can easily access most of these interfaces by simply compiling to the [`wasm32-wasip2`] target (`wasip2` stands for WASI preview 2, or WASI 0.2, the way the work-in-progress WASI spec releases updates). Rust standard library types such as [`std::time::SystemTime`], [`std::fs::File`], or [`std::net::TcpStream`] will automatically make use of the WASI interfaces. Things WASI has no interface for, spawning processes with [`std::process::Command`] for example, return an `Unsupported` error.
 
 ## Wasm Component in Rust
 
 ### Prerequisites
 
 The Rust ecosystem has strong support for building WebAssembly Components. The `wasm32-wasip2` target produces a component directly, and the [`wit-bindgen`] crate generates the Rust bindings for a WIT file at compile time. No extra tools are required.
-
-> Note: Older material (and this workshop until recently) used the [`cargo-component`] tool. Its maintainers are deprecating it in favour of the built-in target.
 
 ### Project Structure
 
@@ -142,6 +140,5 @@ The exercise for this section is quite simple again, you just need to provide an
 [`std::time::SystemTime`]: https://doc.rust-lang.org/std/time/struct.SystemTime.html
 [`std::net::TcpStream`]: https://doc.rust-lang.org/std/net/struct.TcpStream.html
 [`std::process::Command`]: https://doc.rust-lang.org/std/process/struct.Command.html
-[`cargo-component`]: https://github.com/bytecodealliance/cargo-component
 [`wit-bindgen`]: https://docs.rs/wit-bindgen/latest/wit_bindgen/
 [`std::fs::File`]: https://doc.rust-lang.org/std/fs/struct.File.html

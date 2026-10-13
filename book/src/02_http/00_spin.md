@@ -10,7 +10,7 @@ For this workshop we need a host to run our components. We use [`spin`]: it is o
 
 ## Spin Framework
 
-`spin` is an open-source framework for building and running _serverless_ WebAssembly applications on top of [`wasmtime`]. It was created by Fermyon, joined the CNCF sandbox in January 2025 and is maintained by Akamai since it acquired Fermyon in December 2025.
+`spin` is an open-source framework for building and running _serverless_ WebAssembly applications on top of [`wasmtime`].[^1]
 For every incoming request, the runtime will spin up a fresh instance of your Wasm component that is immediately terminated after processing the request. The runtime additionally exposes APIs for common tasks like making HTTP requests, routing, key-value storage, database access, and more. We will go through some of these APIs in the following sections and note which are WASI standards and which are Spin's own.
 
 ### Prerequisites
@@ -63,6 +63,8 @@ Each exercise in this chapter has a `tests` package. The tests start `spin up --
 ## Exercise
 
 Make the component respond with the text `Hello World!`. Have a look at the [`spin_sdk::http`] docs for `Response::builder()`.
+
+[^1]: Created by Fermyon, in the CNCF sandbox since January 2025, maintained by Akamai since it acquired Fermyon in December 2025.
 
 [`spin`]: https://spinframework.dev
 [`wasmtime`]: https://wasmtime.dev

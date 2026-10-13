@@ -30,7 +30,7 @@ When a request arrives, Spin's HTTP trigger examines the URL path and matches it
 
 This allows you to compose applications from modular components (recall the component composition from earlier) that can be developed, tested, and deployed independently. They don't have to be the same language either, a Rust and a Go component can serve routes together.
 
-The exercise does exactly that: `spin.toml` routes `/eval` to the `databases` component from the previous exercise (built from `../04_databases`, unchanged) and `/clear/...` to a new `routing` component.
+The exercise does exactly that: `spin.toml` routes `/eval` to the `databases` component from the previous exercise (built from `../04_databases`) and `/clear/...` to a new `routing` component.
 
 ## Routing Within A Component
 

@@ -44,7 +44,7 @@ watch = ["src/**/*.rs", "Cargo.toml"]
 
 A plain release build comes in at _620 KB_, the profile above brings it down to _370 KB_. `opt-level = "z"` and `lto` are responsible for most of that.
 
-Binaryen's `wasm-opt` (`wasm-opt in.wasm -Oz -o out.wasm`) squeezes core modules further, but it doesn't understand components yet - it fails to parse the `.wasm` files from this chapter - so it only helps with the core modules from chapter 1. Download it from the Binaryen [releases](https://github.com/WebAssembly/binaryen/releases), most package repositories have it as `binaryen` and the `nix` flake of this repo provides it.
+Binaryen's `wasm-opt` (`wasm-opt in.wasm -Oz -o out.wasm`) squeezes core modules further, but it doesn't understand components yet ([binaryen#6728](https://github.com/WebAssembly/binaryen/issues/6728)), so it only helps with the core modules from chapter 1. Download it from the Binaryen [releases](https://github.com/WebAssembly/binaryen/releases), most package repositories have it as `binaryen` (the `nix` flake of this repo already has it too).
 
 Beyond compiler flags, size is mostly dependencies: `serde_json`, `axum` and the SQL client each cost tens of kilobytes. [`cargo bloat`](https://github.com/RazrFalcon/cargo-bloat) or `twiggy` show what you pay for.
 

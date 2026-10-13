@@ -1,4 +1,3 @@
-//! ⚠️ **DO NOT MODIFY THE TESTS** ⚠️
 #![cfg(test)]
 
 use serde::Deserialize;

@@ -1,4 +1,4 @@
-// Generates Rust bindings for the WIT world at compile time. Read the book to find out how.
+// Generates Rust bindings for the WIT world at compile time.
 wit_bindgen::generate!({
     path: "wit",
     world: "example",

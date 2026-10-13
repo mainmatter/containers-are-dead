@@ -1,5 +1,3 @@
-//! ⚠️ **DO NOT MODIFY THE TESTS** ⚠️
-//! `spin up` is started with `--sqlite @migration.sql`, which creates the tables.
 #![cfg(test)]
 
 use serde::Deserialize;
