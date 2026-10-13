@@ -29,6 +29,7 @@ To follow this course, you must install:
 
 - [Rust](https://www.rust-lang.org/tools/install)
 - [Spin](https://spinframework.dev) (installed in chapter 2)
+- _(Optional)_ [wasmtime](https://wasmtime.dev) and `wasm-tools`, used in chapter 2 to inspect components and run them outside of Spin
 
 If you have `nix` installed on your system, you can use the nix flake provided in the [courses Git repository](https://github.com/mainmatter/containers-are-dead) to install the required tools and skip ahead to the next section. Otherwise continue with the installation instructions below.
 

@@ -8,4 +8,4 @@ Everything we built runs on your laptop with `spin up`. To put it on the interne
 
 > Note: Fermyon Cloud, the free hosted service earlier versions of this workshop deployed to, has been superseded by Akamai Functions after Akamai acquired Fermyon in December 2025. Spin 4 no longer treats `spin deploy` as an alias for it; you always name the deployment plugin.
 
-Deployment targets come and go, the component you built doesn't change. That is the point.
+Deployment targets come and go, the component you built doesn't change. That is the point, with one caveat you have seen in the imports: `wasi:http` is a standard today, `wasi:keyvalue` is a draft, SQL has none. Keep the storage code behind a small module of your own and the rest of the component moves between hosts as is.

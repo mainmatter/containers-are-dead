@@ -22,6 +22,8 @@ spin up --build --sqlite @migration.sql
 
 The tests do the same.
 
+Like the key value store this is a Spin interface, `spin:sqlite/sqlite@3.1.0` in the component's imports. Here not even a draft standard exists: [`wasi:sql`] is a phase 1 proposal with no activity since early 2024, and there is no `wasi:sqlite`. The portable alternative is to compile SQLite _into_ the component (`rusqlite` with the `bundled` feature builds for `wasm32-wasip2`), which works for in-memory data but needs a vendor interface or `wasi:filesystem` again for persistence.
+
 ## Connecting to the Database
 
 Once you've configured database access in your manifest, you can establish a connection using the `Connection::open_default()` method. This opens the SQLite database that Spin provides to your component:
@@ -87,6 +89,7 @@ Same rule as above: `result()` finishes the statement and reports an error if re
 Move the variables from the key value store into SQLite and add _sessions_ so users no longer share variables. See `src/lib.rs` and `migration.sql` for the details.
 
 [`SQLite`]: https://www.sqlite.org
+[`wasi:sql`]: https://github.com/WebAssembly/wasi-sql
 [`spin_sdk::sqlite`]: https://docs.rs/spin-sdk/latest/spin_sdk/sqlite/index.html
 [`execute`]: https://docs.rs/spin-sdk/latest/spin_sdk/sqlite/struct.Connection.html#method.execute
 [`QueryResult`]: https://docs.rs/spin-sdk/latest/spin_sdk/sqlite/struct.QueryResult.html

@@ -50,6 +50,16 @@ store.set("foo", "bar".as_bytes()).await?;
 
 All store operations are `async`.
 
+## Where the Standard Ends
+
+Run `wasm-tools component wit` on the finished component and compare with the previous exercise. One new import appeared:
+
+```wit
+import spin:key-value/key-value@3.0.0;
+```
+
+This is a Spin interface, not a WASI one, and `wasmtime serve` refuses the component with "a matching implementation was not found in the linker". A standard is in the making: [`wasi:keyvalue`] is a phase 2 proposal with the same `get`/`set`/`delete` shape. Spin, wasmtime and wasmCloud all implement a draft of it, but they pin different draft versions (`0.2.0-draft2` vs `0.2.0-draft`) and WIT versions must match exactly to link, so a component using it does not yet move between hosts unchanged. Until that settles, storage is where you pick a vendor - and the HTTP handler around it stays portable.
+
 ## JSON
 
 The `spin` store also provides two convenience methods for storing any [`serde`] serializable data into the store as JSON: [`Store::get_json()`] and [`Store::set_json()`].
@@ -91,5 +101,6 @@ Extend the calculator with variables, see `src/lib.rs` for the details. The stor
 [`LocalStorage`]: https://developer.mozilla.org/en-US/docs/Web/API/Storage
 [`Store::open_default()`]: https://docs.rs/spin-sdk/latest/spin_sdk/key_value/struct.Store.html#method.open_default
 [`serde`]: https://docs.rs/serde/latest/serde/index.html
+[`wasi:keyvalue`]: https://github.com/WebAssembly/wasi-keyvalue
 [`Store::get_json()`]: https://docs.rs/spin-sdk/latest/spin_sdk/key_value/struct.Store.html#method.get_json
 [`Store::set_json()`]: https://docs.rs/spin-sdk/latest/spin_sdk/key_value/struct.Store.html#method.set_json

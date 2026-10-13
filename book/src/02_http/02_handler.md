@@ -61,6 +61,34 @@ Start the application with `spin up --build` in a second terminal and try it out
 curl --request POST --data '10 / 2' http://localhost:3000/
 ```
 
+## One Component, Many Hosts
+
+Before moving on, let's cash in on the promise from the end of chapter 1. Inspect the component you just built with [`wasm-tools`] (`cargo install wasm-tools`):
+
+```bash
+wasm-tools component wit target/wasm32-wasip2/debug/handler.wasm
+```
+
+Among the imports you will find only `wasi:cli`, `wasi:clocks`, `wasi:io`, `wasi:random` and `wasi:http/types@0.3.0`, and a single export:
+
+```wit
+export wasi:http/handler@0.3.0;
+```
+
+Nothing in there is specific to Spin. The component implements the standard `wasi:http` world, so any host that speaks it can run it. The reference host is `wasmtime` itself, install the CLI with `curl https://wasmtime.dev/install.sh -sSf | bash` and try:
+
+```bash
+wasmtime serve -Scli target/wasm32-wasip2/debug/handler.wasm
+curl --request POST --data '2 + 3 * 4' http://localhost:8080/
+```
+
+Same binary, same answers, no Spin involved (`-Scli` lets the component use `println!`). wasmCloud and the `jco` runtime for Node.js load the same file as well. The hosts that can't - Fastly Compute, Cloudflare Workers, Wasmer - each have their own ABI and SDK; that is the fragmentation WASI exists to end.
+
+> Note: `wasmtime serve` is a development server. Its own documentation says not to deploy it: no TLS, no rate limiting, no request size limits.
+
+Keep this experiment in mind. The next two sections add storage, and the imports will tell you exactly where the standard ends.
+
 [^1]: A trap is similar to a segfault. It cannot be caught and will cause your Wasm component to be terminated.
 
 [`http`]: https://docs.rs/http/latest/http/
+[`wasm-tools`]: https://github.com/bytecodealliance/wasm-tools

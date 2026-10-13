@@ -24,6 +24,7 @@ Follow the instructions there to get started.
   you installed Rust on your system)
   to make sure you're running on the latest stable version.
 - **Spin** (follow instructions [here](https://spinframework.dev/v4/install)). Needed from chapter 2 onwards.
+- _(Optional)_ **wasmtime** (`curl https://wasmtime.dev/install.sh -sSf | bash`) and **wasm-tools** (`cargo install wasm-tools`) for the portability demo in chapter 2.
 - _(Optional but recommended)_ An IDE with Rust autocompletion support.
   We recommend one of the following:
   - [RustRover](https://www.jetbrains.com/rust/);
