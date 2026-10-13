@@ -49,8 +49,12 @@ connection
         "INSERT INTO users (name, age) VALUES (?, ?)",
         [Value::Text("john".to_string()), Value::Integer(20)],
     )
+    .await?
+    .result()
     .await?;
 ```
+
+Careful: `execute` returns as soon as the statement has been _started_. The [`QueryResult`] it returns is a stream of rows plus a future for the outcome of the statement; `result()` awaits that future. Skip it and your `INSERT` may not have happened yet when you send the response.
 
 ## Retrieving Data
 
@@ -73,7 +77,10 @@ while let Some(row) = rows.next().await {
     let age: i64 = row.get(1).unwrap();
     println!("User: {}, Age: {}", name, age);
 }
+rows.result().await?;
 ```
+
+Same rule as above: `result()` finishes the statement and reports an error if reading the rows failed. [`collect()`] does both in one go if the result set fits into memory.
 
 ## Exercise
 
@@ -85,5 +92,6 @@ Move the variables from the key value store into SQLite and add _sessions_ so us
 [`QueryResult`]: https://docs.rs/spin-sdk/latest/spin_sdk/sqlite/struct.QueryResult.html
 [`next()`]: https://docs.rs/spin-sdk/latest/spin_sdk/sqlite/struct.QueryResult.html#method.next
 [`columns()`]: https://docs.rs/spin-sdk/latest/spin_sdk/sqlite/struct.QueryResult.html#method.columns
+[`collect()`]: https://docs.rs/spin-sdk/latest/spin_sdk/sqlite/struct.QueryResult.html#method.collect
 [`RowResult`]: https://docs.rs/spin-sdk/latest/spin_sdk/sqlite/struct.RowResult.html
 [`get()`]: https://docs.rs/spin-sdk/latest/spin_sdk/sqlite/struct.RowResult.html#method.get
