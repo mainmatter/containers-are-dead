@@ -12,3 +12,7 @@ exercises/progress.db
 
 # VSCode
 .vscode/
+
+# Direnv
+.direnv/
+.envrc

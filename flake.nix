@@ -41,6 +41,7 @@
             jujutsu
             typos
             dprint
+            workshop-runner
           ];
         };
       }
