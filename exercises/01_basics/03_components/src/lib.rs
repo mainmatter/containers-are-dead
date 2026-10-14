@@ -5,5 +5,12 @@ wit_bindgen::generate!({
     generate_all,
 });
 
-// This component should implement the interface laid out in the WIT file.
-// If you get stuck, ask a neighbor or grab a trainer!
+struct Example;
+
+impl Guest for Example {
+    fn add_random(num: u64) -> u64 {
+        num.saturating_add(wasi::random::random::get_random_u64())
+    }
+}
+
+export!(Example);

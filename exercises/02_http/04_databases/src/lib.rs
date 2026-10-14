@@ -1,6 +1,12 @@
+use anyhow::{Context, bail};
 use serde::{Deserialize, Serialize};
-use spin_sdk::http::{Request, Response};
+use serde_querystring::ParseMode;
+use spin_sdk::http::body::IncomingBodyExt;
+use spin_sdk::http::{IntoResponse, Method, Request, Response, StatusCode};
 use spin_sdk::http_service;
+use spin_sdk::sqlite::{Connection, Value};
+use std::iter::Peekable;
+use std::str::FromStr;
 
 // curl --request POST --data 'a = 10' http://localhost:3000/
 // curl --request POST --data 'a * 2' http://localhost:3000/?session=<ID>
@@ -16,17 +22,227 @@ struct EvalResponse {
     result: Option<f64>,
 }
 
-// This component should:
-// 1. parse and evaluate input expressions as before
-// 2. it should NOT store assigned <ident> => value pairs in the KV store but instead in the provided SQLite database's variables table.
-//    see the `migration.sql` file for the shape of the table. Reassigning a variable replaces its value.
-// 3. It should support session IDs to handle multiple concurrent users. A session ID may be provided via the query parameters (see the struct above)
-//    and IF PRESENT should be used to select the matching rows in the table. IF NOT PRESENT we should generate one (using the sessions table).
-//    An unknown session ID is a client error (404).
-// 4. Variables stored in one session MUST NOT be visible in another session
-// 5. Respond with the `EvalResponse` struct above serialized as JSON
-// If you get stuck, ask a neighbor or grab a trainer!
 #[http_service]
-pub async fn handler(req: Request) -> anyhow::Result<Response<String>> {
-    todo!()
+pub async fn handler(req: Request) -> anyhow::Result<impl IntoResponse> {
+    if req.method() != Method::POST {
+        return text(StatusCode::METHOD_NOT_ALLOWED, "only POST is supported");
+    }
+
+    let params: QueryParams =
+        serde_querystring::from_str(req.uri().query().unwrap_or(""), ParseMode::UrlEncoded)?;
+
+    let db = Connection::open_default().await?;
+
+    let session = match params.session {
+        Some(session) => {
+            let mut rows = db
+                .execute(
+                    "SELECT 1 FROM sessions WHERE session_id = ?",
+                    [Value::Integer(session)],
+                )
+                .await?;
+            let known = rows.next().await.is_some();
+            rows.result().await?;
+            if !known {
+                return text(StatusCode::NOT_FOUND, format!("unknown session {session}"));
+            }
+            session
+        }
+        None => {
+            let mut rows = db
+                .execute(
+                    "INSERT INTO sessions DEFAULT VALUES RETURNING session_id",
+                    [],
+                )
+                .await?;
+            let row = rows.next().await.context("INSERT returned no row")?;
+            rows.result().await?;
+            row.get(0).context("session_id is not an integer")?
+        }
+    };
+
+    let body = req.into_body().bytes().await?;
+    let input = str::from_utf8(&body)?;
+
+    match evaluate(input, &db, session).await {
+        Ok(result) => Ok(Response::builder()
+            .status(StatusCode::OK)
+            .header("content-type", "application/json")
+            .body(serde_json::to_string(&EvalResponse { session, result })?)?),
+        Err(err) => text(StatusCode::BAD_REQUEST, err.to_string()),
+    }
+}
+
+fn text(status: StatusCode, body: impl Into<String>) -> anyhow::Result<Response<String>> {
+    Ok(Response::builder()
+        .status(status)
+        .header("content-type", "text/plain")
+        .body(body.into())?)
+}
+
+/// Evaluates an expression, or stores the result of an assignment and returns `None`.
+async fn evaluate(input: &str, db: &Connection, session: i64) -> anyhow::Result<Option<f64>> {
+    let mut tokens = tokenize(input)?;
+
+    // `<ident> = <expression>`
+    let assign_to = match tokens.as_slice() {
+        [Token::Identifier(name), Token::Assign, ..] => Some(name.clone()),
+        _ => None,
+    };
+    if assign_to.is_some() {
+        tokens.drain(..2);
+    }
+
+    // identifiers are looked up before evaluating, so the evaluator stays synchronous
+    for token in &mut tokens {
+        if let Token::Identifier(name) = token {
+            let mut rows = db
+                .execute(
+                    "SELECT value FROM variables WHERE session_id = ? AND key = ?",
+                    [Value::Integer(session), Value::Text(name.clone())],
+                )
+                .await?;
+            let row = rows.next().await;
+            rows.result().await?;
+            let row = row.with_context(|| format!("unknown variable `{name}`"))?;
+            *token = Token::Number(row.get(0).context("value is not a REAL")?);
+        }
+    }
+
+    let mut evaluator = Evaluator {
+        tokens: tokens.into_iter().peekable(),
+    };
+    let result = evaluator.expression()?;
+    if let Some(token) = evaluator.tokens.next() {
+        bail!("unexpected token {token:?}");
+    }
+
+    match assign_to {
+        Some(name) => {
+            db.execute(
+                "INSERT OR REPLACE INTO variables (session_id, key, value) VALUES (?, ?, ?)",
+                [
+                    Value::Integer(session),
+                    Value::Text(name),
+                    Value::Real(result),
+                ],
+            )
+            .await?
+            // `execute` only starts the statement, `result` waits for it to finish
+            .result()
+            .await?;
+            Ok(None)
+        }
+        None => Ok(Some(result)),
+    }
+}
+
+#[derive(Debug, PartialEq)]
+enum Token {
+    Number(f64),
+    Identifier(String),
+    Assign,
+    Plus,
+    Minus,
+    Multiply,
+    Divide,
+    LeftParen,
+    RightParen,
+}
+
+fn tokenize(input: &str) -> anyhow::Result<Vec<Token>> {
+    let mut tokens = Vec::new();
+    let mut chars = input.chars().peekable();
+
+    while let Some(ch) = chars.next() {
+        let token = match ch {
+            ' ' | '\t' | '\n' => continue,
+            '=' => Token::Assign,
+            '+' => Token::Plus,
+            '-' => Token::Minus,
+            '*' => Token::Multiply,
+            '/' => Token::Divide,
+            '(' => Token::LeftParen,
+            ')' => Token::RightParen,
+            c if c.is_ascii_digit() => {
+                let mut str = c.to_string();
+                while let Some(ch) = chars.next_if(|c| c.is_ascii_digit() || *c == '.') {
+                    str.push(ch);
+                }
+                Token::Number(f64::from_str(&str)?)
+            }
+            c if c.is_ascii_alphabetic() => {
+                let mut str = c.to_string();
+                while let Some(ch) = chars.next_if(|c| c.is_ascii_alphanumeric() || *c == '_') {
+                    str.push(ch);
+                }
+                Token::Identifier(str)
+            }
+            _ => bail!("unexpected character `{ch}`"),
+        };
+        tokens.push(token);
+    }
+
+    Ok(tokens)
+}
+
+struct Evaluator {
+    tokens: Peekable<std::vec::IntoIter<Token>>,
+}
+
+impl Evaluator {
+    fn expression(&mut self) -> anyhow::Result<f64> {
+        let mut result = self.term()?;
+
+        while let Some(token) = self.tokens.peek() {
+            match token {
+                Token::Plus => {
+                    self.tokens.next();
+                    result += self.term()?;
+                }
+                Token::Minus => {
+                    self.tokens.next();
+                    result -= self.term()?;
+                }
+                _ => break,
+            }
+        }
+
+        Ok(result)
+    }
+
+    fn term(&mut self) -> anyhow::Result<f64> {
+        let mut result = self.factor()?;
+
+        while let Some(token) = self.tokens.peek() {
+            match token {
+                Token::Multiply => {
+                    self.tokens.next();
+                    result *= self.factor()?;
+                }
+                Token::Divide => {
+                    self.tokens.next();
+                    result /= self.factor()?;
+                }
+                _ => break,
+            }
+        }
+
+        Ok(result)
+    }
+
+    fn factor(&mut self) -> anyhow::Result<f64> {
+        match self.tokens.next().context("unexpected end of input")? {
+            Token::Number(n) => Ok(n),
+            Token::Minus => Ok(-self.factor()?),
+            Token::LeftParen => {
+                let result = self.expression()?;
+                match self.tokens.next() {
+                    Some(Token::RightParen) => Ok(result),
+                    _ => bail!("missing closing parenthesis"),
+                }
+            }
+            token => bail!("unexpected token {token:?}"),
+        }
+    }
 }
