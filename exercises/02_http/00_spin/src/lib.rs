@@ -8,6 +8,8 @@ pub async fn handler(req: Request) -> anyhow::Result<impl IntoResponse> {
         req.headers().get("spin-full-url")
     );
 
-    // TODO return a correct response
-    // see the docs for details: https://docs.rs/spin-sdk/latest/spin_sdk/http/index.html
+    Ok(Response::builder()
+        .status(200)
+        .header("content-type", "text/plain")
+        .body("Hello World!".to_string())?)
 }

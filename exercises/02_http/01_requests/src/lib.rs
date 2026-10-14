@@ -1,5 +1,7 @@
 use serde::Deserialize;
-use spin_sdk::http::{Request, Response};
+use serde_querystring::ParseMode;
+use spin_sdk::http::body::IncomingBodyExt;
+use spin_sdk::http::{EmptyBody, IntoResponse, Method, Request, Response};
 use spin_sdk::http_service;
 
 /// The endpoint should accept the following query parameters
@@ -12,13 +14,31 @@ struct Params {
 }
 
 #[http_service]
-pub async fn handler(req: Request) -> anyhow::Result<Response<String>> {
-    // Hint: use the `serde_querystring` crate that is already added as a dependency to parse the `req.uri().query()` string!
-    // see that crates docs for details!
+pub async fn handler(req: Request) -> anyhow::Result<impl IntoResponse> {
+    let params: Params =
+        serde_querystring::from_str(req.uri().query().unwrap_or(""), ParseMode::UrlEncoded)?;
 
-    // TODO: read the base URL of the API from the `random_api` variable (see the book), request
-    // "<base url>/api/v1.0/random?min={}&max={}" and return a single number as a result.
-    // The API answers with a JSON array containing one number, e.g. `[40]`. `serde_json` is a dependency.
+    let api = spin_sdk::variables::get("random_api").await?;
+    let req = Request::builder()
+        .method(Method::GET)
+        .uri(format!(
+            "{api}/api/v1.0/random?min={}&max={}",
+            params.min.unwrap_or(0),
+            params.max.unwrap_or(1000)
+        ))
+        .body(EmptyBody::new())?;
 
-    todo!()
+    let res: Response = spin_sdk::http::send(req).await?;
+    let body = res.into_body().bytes().await?;
+
+    // the API answers with a JSON array containing a single number, e.g. `[40]`
+    let numbers: Vec<f64> = serde_json::from_slice(&body)?;
+    let number = numbers
+        .first()
+        .ok_or_else(|| anyhow::anyhow!("empty response"))?;
+
+    Ok(Response::builder()
+        .status(200)
+        .header("content-type", "text/plain")
+        .body(number.to_string())?)
 }
