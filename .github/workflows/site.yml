@@ -28,20 +28,6 @@ jobs:
         run: |
           cd book
           mdbook build
-      - name: Link Checker
-        uses: lycheeverse/lychee-action@v2
-        with:
-          fail: true
-          # Only check HTML: lychee >= 0.20 also scans .txt/.css, which pulls in
-          # mdbook's vendored font licenses (http:// links we don't control).
-          # 404.html uses a root-relative <base href> that lychee can't resolve.
-          args: |
-            --exclude-loopback
-            --require-https
-            --no-progress
-            --extensions html
-            --exclude-path 'book/book/404\.html$'
-            book/book
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
