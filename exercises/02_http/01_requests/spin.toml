@@ -5,7 +5,7 @@ name = "requests"
 version = "1.0.0"
 
 [variables]
-random_api = { default = "http://www.randomnumberapi.com" }
+random_api = { default = "https://www.randomnumberapi.com" }
 
 [[trigger.http]]
 route = "/..."
@@ -13,7 +13,7 @@ component = "requests"
 
 [component.requests]
 source = "../../../target/wasm32-wasip2/debug/requests.wasm"
-allowed_outbound_hosts = ["http://www.randomnumberapi.com", "http://127.0.0.1:3100"]
+allowed_outbound_hosts = ["https://www.randomnumberapi.com", "http://127.0.0.1:3100"]
 
 [component.requests.variables]
 random_api = "{{ random_api }}"
